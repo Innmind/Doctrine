@@ -15,11 +15,14 @@
         "issues": "http://github.com/innmind/doctrine/issues"
     },
     "require": {
-        "php": "~7.4"
+        "php": "~7.4",
+        "innmind/immutable": "^3.6"
     },
     "autoload": {
         "psr-4": {
-            "Innmind\\Doctrine\\": "src/"
+            "Innmind\\Doctrine\\": "src/",
+            "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
+            "Properties\\Innmind\\Doctrine\\": "properties/"
         }
     },
     "autoload-dev": {

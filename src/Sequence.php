@@ -68,6 +68,9 @@ interface Sequence
     public function add($element): self;
 
     /**
+     * This method only works for sequences of objects having a method with the
+     * same name as the given property name
+     *
      * @param string $property Name of the property of the objects to filter by
      * @param 'asc'|'desc' $direction
      *
