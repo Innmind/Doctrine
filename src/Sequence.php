@@ -7,6 +7,7 @@ use Innmind\Doctrine\Exception\NoElementMatchingPredicateFound;
 
 /**
  * @template T
+ * @psalm-immutable
  */
 interface Sequence
 {

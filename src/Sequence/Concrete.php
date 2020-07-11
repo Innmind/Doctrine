@@ -11,6 +11,7 @@ use Innmind\Immutable;
 
 /**
  * @template T
+ * @psalm-immutable
  */
 final class Concrete implements Sequence
 {
@@ -22,6 +23,7 @@ final class Concrete implements Sequence
      */
     private function __construct(Immutable\Sequence $sequence)
     {
+        /** @psalm-suppress ImpurePropertyAssignment */
         $this->sequence = $sequence;
     }
 
@@ -42,6 +44,7 @@ final class Concrete implements Sequence
 
     public function size(): int
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->sequence->size();
     }
 
@@ -50,6 +53,7 @@ final class Concrete implements Sequence
      */
     public function drop(int $size): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return new self($this->sequence->drop($size));
     }
 
@@ -58,6 +62,7 @@ final class Concrete implements Sequence
      */
     public function take(int $size): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return new self($this->sequence->take($size));
     }
 
@@ -66,6 +71,7 @@ final class Concrete implements Sequence
      */
     public function equals(Sequence $other): bool
     {
+        /** @psalm-suppress ImpureFunctionCall */
         return Immutable\unwrap($this->sequence) === $other->reduce(
             [],
             static function(array $elements, $element): array {
@@ -84,6 +90,7 @@ final class Concrete implements Sequence
      */
     public function filter(callable $predicate): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return new self($this->sequence->filter($predicate));
     }
 
@@ -92,6 +99,7 @@ final class Concrete implements Sequence
      */
     public function foreach(callable $function): void
     {
+        /** @psalm-suppress ImpureMethodCall */
         $this->sequence->foreach($function);
     }
 
@@ -100,6 +108,7 @@ final class Concrete implements Sequence
      */
     public function contains($element): bool
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->sequence->contains($element);
     }
 
@@ -113,6 +122,7 @@ final class Concrete implements Sequence
     public function map(callable $function): self
     {
         /**
+         * @psalm-suppress ImpureMethodCall
          * @psalm-suppress InvalidArgument It's ok since we use Immutable\Sequence<mixed>
          * @var self<V>
          */
@@ -126,6 +136,7 @@ final class Concrete implements Sequence
      */
     public function append(Sequence $other): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $other->reduce(
             $this,
             static fn(self $new, $element): self => $new->add($element),
@@ -139,6 +150,7 @@ final class Concrete implements Sequence
      */
     public function add($element): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return new self(($this->sequence)($element));
     }
 
@@ -166,6 +178,7 @@ final class Concrete implements Sequence
             $compare = static fn($a, $b): int => $compare($b, $a);
         }
 
+        /** @psalm-suppress ImpureMethodCall */
         return new self($this->sequence->sort($compare));
     }
 
@@ -179,6 +192,7 @@ final class Concrete implements Sequence
      */
     public function reduce($initial, callable $reducer)
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->sequence->reduce($initial, $reducer);
     }
 
@@ -189,11 +203,13 @@ final class Concrete implements Sequence
      */
     public function clear(): self
     {
+        /** @psalm-suppress ImpureMethodCall */
         return new self($this->sequence->clear());
     }
 
     public function empty(): bool
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->sequence->empty();
     }
 
@@ -209,6 +225,7 @@ final class Concrete implements Sequence
     public function find(callable $predicate)
     {
         try {
+            /** @psalm-suppress ImpureMethodCall */
             return $this->sequence->find($predicate);
         } catch (Immutable\Exception\NoElementMatchingPredicateFound $e) {
             throw new NoElementMatchingPredicateFound;
