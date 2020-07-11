@@ -42,6 +42,21 @@ final class Concrete implements Sequence
         return new self($sequence);
     }
 
+    /**
+     * @template V
+     *
+     * @param \Generator<V> $elements
+     *
+     * @return self<V>
+     */
+    public static function defer(\Generator $elements): self
+    {
+        /** @var Immutable\Sequence<V> */
+        $sequence = Immutable\Sequence::defer('mixed', $elements);
+
+        return new self($sequence);
+    }
+
     public function size(): int
     {
         /** @psalm-suppress ImpureMethodCall */

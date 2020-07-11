@@ -38,4 +38,21 @@ class ConcreteTest extends TestCase
                 $properties->ensureHeldBy(Concrete::of(...$elements));
             });
     }
+
+    public function testDeferHoldProperties()
+    {
+        $this
+            ->forAll(
+                Properties::properties(),
+                Set\Sequence::of(
+                    Element::any(),
+                    Set\Integers::between(0, 5),
+                ),
+            )
+            ->then(function($properties, $elements) {
+                $properties->ensureHeldBy(Concrete::defer((function($elements) {
+                    yield from $elements;
+                })($elements)));
+            });
+    }
 }
