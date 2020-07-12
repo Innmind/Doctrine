@@ -6,7 +6,7 @@ namespace Tests\Innmind\Doctrine\Specification;
 use Innmind\Doctrine\{
     Specification\ToArray,
     Exception\OnlyAndCompositeSupported,
-    Exception\OnlyEqualityComparisonSupported,
+    Exception\ComparisonNotSupported,
 };
 use Innmind\Specification\{
     Not,
@@ -62,11 +62,11 @@ class ToArrayTest extends TestCase
                 'in',
             ))
             ->then(function($sign) {
-                $this->expectException(OnlyEqualityComparisonSupported::class);
+                $this->expectException(ComparisonNotSupported::class);
 
                 $specification = $this->createMock(Comparator::class);
                 $specification
-                    ->expects($this->once())
+                    ->expects($this->any())
                     ->method('sign')
                     ->willReturn(Sign::$sign());
 

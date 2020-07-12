@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine;
 
-use Innmind\Doctrine\Exception\EntityNotFound;
+use Innmind\Doctrine\{
+    Specification\ToQueryBuilder,
+    Exception\EntityNotFound,
+};
 use Innmind\Specification\Specification;
 use Doctrine\ORM\{
     EntityManagerInterface,
@@ -73,8 +76,16 @@ final class Repository
 
     public function matching(Specification $specification): Sequence
     {
+        $repository = $this->doctrine->getRepository($this->entityClass);
+
+        if ($repository instanceof EntityRepository) {
+            return new Sequence\DeferQuery(
+                (new ToQueryBuilder($repository))($specification),
+            );
+        }
+
         return new Sequence\DeferFindBy(
-            $this->doctrine->getRepository($this->entityClass),
+            $repository,
             $specification,
         );
     }

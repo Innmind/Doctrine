@@ -8,7 +8,10 @@ use Innmind\Doctrine\{
     Sequence,
     Exception\EntityNotFound,
 };
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\{
+    EntityManagerInterface,
+    EntityRepository,
+};
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -19,7 +22,10 @@ use Fixtures\Innmind\Doctrine\{
     Id,
     Element,
 };
-use Example\Innmind\Doctrine\Username;
+use Example\Innmind\Doctrine\{
+    User,
+    Username,
+};
 
 class RepositoryTest extends TestCase
 {
@@ -213,6 +219,27 @@ class RepositoryTest extends TestCase
 
                 $this->assertInstanceOf(
                     Sequence\DeferFindBy::class,
+                    $repository->matching(new Username($username)),
+                );
+            });
+    }
+
+    public function testMatchingAdvancedSpecification()
+    {
+        $this
+            ->forAll(
+                Set\Unicode::strings(),
+            )
+            ->then(function($username) {
+                $doctrine = require __DIR__.'/../config/entity-manager.php';
+
+                $repository = new Repository(
+                    $doctrine,
+                    User::class,
+                );
+
+                $this->assertInstanceOf(
+                    Sequence\DeferQuery::class,
                     $repository->matching(new Username($username)),
                 );
             });

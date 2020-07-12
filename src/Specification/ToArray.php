@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Doctrine\Specification;
 
 use Innmind\Doctrine\Exception\{
-    OnlyEqualityComparisonSupported,
+    ComparisonNotSupported,
     OnlyAndCompositeSupported,
 };
 use Innmind\Specification\{
@@ -27,7 +27,7 @@ final class ToArray
     {
         if ($specification instanceof Comparator) {
             if (!$specification->sign()->equals(Sign::equality())) {
-                throw new OnlyEqualityComparisonSupported;
+                throw new ComparisonNotSupported((string) $specification->sign());
             }
 
             return [$specification->property() => $specification->value()];
