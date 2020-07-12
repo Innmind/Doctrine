@@ -19,16 +19,13 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['7.4']
     name: 'PHPUnit - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
-    services:
-      mariadb:
-        image: mariadb:10
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Create database
+        run: mysql "--execute=CREATE TABLE IF NOT EXISTS example"
+      - name: Setup database schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
@@ -56,16 +53,13 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['7.4']
     name: 'Coverage - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
-    services:
-      mariadb:
-        image: mariadb:10
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Create database
+        run: mysql "--execute=CREATE TABLE IF NOT EXISTS example"
+      - name: Setup database schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
