@@ -7,11 +7,7 @@ use Innmind\Doctrine\{
     Sequence\DeferFindBy,
     Sequence,
 };
-use Innmind\Specification\{
-    Specification,
-    Comparator,
-    Sign,
-};
+use Innmind\Specification\Specification;
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -74,16 +70,16 @@ class DeferFindByTest extends TestCase
                 Set\Elements::of('alice', 'bob', 'jane', 'john'),
             )
             ->then(function($property, $username) {
-                $repository = new DeferFindBy(
+                $sequence = new DeferFindBy(
                     $this->entityManager->getRepository(Entity::class),
                     new Username($username),
                 );
 
-                if (!$property->applicableTo($repository)) {
+                if (!$property->applicableTo($sequence)) {
                     return;
                 }
 
-                $property->ensureHeldBy($repository);
+                $property->ensureHeldBy($sequence);
             });
     }
 
