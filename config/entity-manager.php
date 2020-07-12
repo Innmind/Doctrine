@@ -12,6 +12,7 @@ $params = [
     'user' => 'root',
     'password' => 'root',
     'dbname' => 'example',
+    'port' => (int) (\getenv('DB_PORT') ? \getenv('DB_PORT') : 3306),
 ];
 
 $config = Setup::createXMLMetadataConfiguration(

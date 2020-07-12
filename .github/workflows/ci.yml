@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
         php-version: ['7.4']
     name: 'PHPUnit - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
     services:
@@ -24,6 +24,7 @@ jobs:
         image: mariadb:10
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
         ports:
             - 3306
     steps:
@@ -45,15 +46,20 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-progress
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
           BLACKBOX_DETAILED_PROPERTIES: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
         php-version: ['7.4']
     name: 'Coverage - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
     services:
@@ -61,6 +67,7 @@ jobs:
         image: mariadb:10
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
         ports:
             - 3306
     steps:
@@ -83,10 +90,15 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-progress
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
           BLACKBOX_SET_SIZE: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
