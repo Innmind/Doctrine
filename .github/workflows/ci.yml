@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
@@ -69,6 +71,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
