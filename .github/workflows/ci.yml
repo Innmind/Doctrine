@@ -30,8 +30,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Setup schema
-        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
@@ -48,6 +46,8 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-progress
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
@@ -71,8 +71,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Setup schema
-        run: vendor/bin/doctrine orm:schema:update --force
       - name: Setup PHP
         uses: shivammathur/setup-php@v1
         with:
@@ -90,6 +88,8 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install --no-progress
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
