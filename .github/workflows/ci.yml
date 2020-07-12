@@ -50,6 +50,7 @@ jobs:
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
           BLACKBOX_DETAILED_PROPERTIES: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -89,6 +90,7 @@ jobs:
         run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
           BLACKBOX_SET_SIZE: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
