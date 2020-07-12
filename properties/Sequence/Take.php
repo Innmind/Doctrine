@@ -30,6 +30,7 @@ final class Take implements Property
         $sequence2 = $sequence->take($this->number);
         Assert::assertNotSame($sequence, $sequence2);
         Assert::assertLessThanOrEqual($sequence->size(), $sequence2->size());
+        Assert::assertLessThanOrEqual($this->number, $sequence2->size());
         $sequence2->foreach(fn($element) => Assert::assertTrue($sequence->contains($element)));
         Assert::assertTrue(
             $sequence2->equals($sequence->take($this->number)),
