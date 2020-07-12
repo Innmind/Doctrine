@@ -48,6 +48,8 @@ jobs:
         run: composer install --no-progress
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
@@ -90,6 +92,8 @@ jobs:
         run: composer install --no-progress
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
