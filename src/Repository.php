@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Doctrine;
 
 use Innmind\Doctrine\Exception\EntityNotFound;
+use Innmind\Specification\Specification;
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
@@ -68,6 +69,14 @@ final class Repository
     public function remove(object $entity): void
     {
         $this->doctrine->remove($entity);
+    }
+
+    public function matching(Specification $specification): Sequence
+    {
+        return new Sequence\DeferFindBy(
+            $this->doctrine->getRepository($this->entityClass),
+            $specification,
+        );
     }
 
     /**

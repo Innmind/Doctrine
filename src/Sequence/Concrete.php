@@ -29,6 +29,7 @@ final class Concrete implements Sequence
 
     /**
      * @template V
+     * @psalm-pure
      *
      * @param V $elements
      *
@@ -36,7 +37,10 @@ final class Concrete implements Sequence
      */
     public static function of(...$elements): self
     {
-        /** @var Immutable\Sequence<V> */
+        /**
+         * @psalm-suppress ImpureMethodCall
+         * @var Immutable\Sequence<V>
+         */
         $sequence = Immutable\Sequence::mixed(...$elements);
 
         return new self($sequence);
@@ -44,6 +48,7 @@ final class Concrete implements Sequence
 
     /**
      * @template V
+     * @psalm-pure
      *
      * @param \Generator<V> $elements
      *
@@ -51,7 +56,10 @@ final class Concrete implements Sequence
      */
     public static function defer(\Generator $elements): self
     {
-        /** @var Immutable\Sequence<V> */
+        /**
+         * @psalm-suppress ImpureMethodCall
+         * @var Immutable\Sequence<V>
+         */
         $sequence = Immutable\Sequence::defer('mixed', $elements);
 
         return new self($sequence);

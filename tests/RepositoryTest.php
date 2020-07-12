@@ -5,6 +5,7 @@ namespace Tests\Innmind\Doctrine;
 
 use Innmind\Doctrine\{
     Repository,
+    Sequence,
     Exception\EntityNotFound,
 };
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +19,7 @@ use Fixtures\Innmind\Doctrine\{
     Id,
     Element,
 };
+use Example\Innmind\Doctrine\Username;
 
 class RepositoryTest extends TestCase
 {
@@ -188,6 +190,30 @@ class RepositoryTest extends TestCase
                                 return $entities;
                             },
                         ),
+                );
+            });
+    }
+
+    public function testMatchingSimpleSpecification()
+    {
+        $this
+            ->forAll(
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($entityClass, $username) {
+                $repository = new Repository(
+                    $doctrine = $this->createMock(EntityManagerInterface::class),
+                    $entityClass,
+                );
+                $doctrine
+                    ->expects($this->once())
+                    ->method('getRepository')
+                    ->willReturn($this->createMock(ObjectRepository::class));
+
+                $this->assertInstanceOf(
+                    Sequence\DeferFindBy::class,
+                    $repository->matching(new Username($username)),
                 );
             });
     }
