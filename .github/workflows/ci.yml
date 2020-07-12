@@ -2,14 +2,6 @@ name: CI
 
 on: [push]
 
-services:
-  mariadb:
-    image: mariadb:10
-    env:
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-        - 3306
-
 jobs:
   roave_bc_check:
     name: Roave BC Check
@@ -27,6 +19,13 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['7.4']
     name: 'PHPUnit - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -57,6 +56,13 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['7.4']
     name: 'Coverage - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v1
