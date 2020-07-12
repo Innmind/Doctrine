@@ -24,6 +24,7 @@ jobs:
         image: mariadb:10
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
         ports:
             - 3306
     steps:
@@ -61,6 +62,7 @@ jobs:
         image: mariadb:10
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
         ports:
             - 3306
     steps:
