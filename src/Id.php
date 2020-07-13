@@ -39,4 +39,14 @@ class Id
     {
         return $this->id;
     }
+
+    /**
+     * This method is required by Doctrine as all ids must be castable to string
+     *
+     * @internal Never use this method in your code
+     */
+    final public function __toString(): string
+    {
+        return $this->id;
+    }
 }

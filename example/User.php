@@ -3,14 +3,16 @@ declare(strict_types = 1);
 
 namespace Example\Innmind\Doctrine;
 
+use Innmind\Doctrine\Id;
+
 final class User
 {
-    private string $id;
+    private Id $id;
     private string $username;
     private int $registerIndex;
 
     public function __construct(
-        string $id,
+        Id $id,
         string $username,
         int $registerIndex = 0
     ) {

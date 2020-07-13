@@ -1,6 +1,6 @@
 <doctrine-mapping>
     <entity name="Example\Innmind\Doctrine\User" table="user">
-        <id name="id" type="string">
+        <id name="id" type="object_id">
             <generator strategy="NONE" />
         </id>
         <field name="username" type="string" />
