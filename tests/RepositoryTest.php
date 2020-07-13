@@ -11,6 +11,7 @@ use Innmind\Doctrine\{
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
+    QueryBuilder,
 };
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
@@ -194,6 +195,35 @@ class RepositoryTest extends TestCase
                                 return $entities;
                             },
                         ),
+                );
+            });
+    }
+
+    public function testAdvancedAll()
+    {
+        $this
+            ->forAll(
+                Set\Unicode::strings(),
+                User::list(),
+            )
+            ->then(function($entityClass, $entities) {
+                $repository = new Repository(
+                    $doctrine = $this->createMock(EntityManagerInterface::class),
+                    $entityClass,
+                );
+                $doctrine
+                    ->expects($this->once())
+                    ->method('getRepository')
+                    ->willReturn($innerRepository = $this->createMock(EntityRepository::class));
+                $innerRepository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($this->createMock(QueryBuilder::class));
+
+                $this->assertInstanceOf(
+                    Sequence\DeferQuery::class,
+                    $repository->all(),
                 );
             });
     }

@@ -95,9 +95,18 @@ final class Repository
      */
     public function all(): Sequence
     {
+        $repository = $this->doctrine->getRepository($this->entityClass);
+
+        if ($repository instanceof EntityRepository) {
+            /** @var Sequence<T> */
+            return new Sequence\DeferQuery(
+                $repository->createQueryBuilder('entity'),
+            );
+        }
+
         /** @var Sequence<T> */
         return Sequence\Concrete::of(
-            ...$this->doctrine->getRepository($this->entityClass)->findAll(),
+            ...$repository->findAll(),
         );
     }
 }
