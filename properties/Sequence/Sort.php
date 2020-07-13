@@ -30,26 +30,26 @@ final class Sort implements Property
 
     public function ensureHeldBy(object $sequence): object
     {
-        $sequence2 = $sequence->sort('prop', 'asc');
-        $sequence3 = $sequence->sort('prop', 'desc');
+        $sequence2 = $sequence->sort('registerIndex', 'asc');
+        $sequence3 = $sequence->sort('registerIndex', 'desc');
         Assert::assertFalse($sequence3->equals($sequence2));
         Assert::assertTrue(
             $sequence2
-                ->sort('prop', 'asc')
+                ->sort('registerIndex', 'asc')
                 ->equals($sequence2),
             'sort() is not idempotent',
         );
         Assert::assertTrue(
             $sequence2
-                ->sort('prop', 'desc')
-                ->sort('prop', 'asc')
+                ->sort('registerIndex', 'desc')
+                ->sort('registerIndex', 'asc')
                 ->equals($sequence2),
             'sort() is not idempotent',
         );
         $elements = $this->unwrap($sequence2);
-        Assert::assertLessThan(\reset($elements)->prop(), \end($elements)->prop());
+        Assert::assertLessThan(\reset($elements)->registerIndex(), \end($elements)->registerIndex());
         $elements = $this->unwrap($sequence3);
-        Assert::assertGreaterThan(\reset($elements)->prop(), \end($elements)->prop());
+        Assert::assertGreaterThan(\reset($elements)->registerIndex(), \end($elements)->registerIndex());
 
         return $sequence;
     }

@@ -12,18 +12,14 @@ final class User
     public function __construct(
         string $id,
         string $username,
-        int $registerIndex
+        int $registerIndex = 0
     ) {
         $this->id = $id;
         $this->username = $username;
         $this->registerIndex = $registerIndex;
     }
 
-    /**
-     * For compatibility with the Element fixture, as it is used the the
-     * properties to prove the behaviour of sequences
-     */
-    public function prop(): int
+    public function registerIndex(): int
     {
         return $this->registerIndex;
     }

@@ -83,7 +83,7 @@ final class Sequence
                     static fn($a, $b) => [$a, $b],
                     User::any(),
                     User::any(),
-                )->filter(static fn($elements) => $elements[0]->prop() < $elements[1]->prop()),
+                )->filter(static fn($elements) => $elements[0]->registerIndex() < $elements[1]->registerIndex()),
             ),
         ];
     }

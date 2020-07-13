@@ -32,14 +32,14 @@ final class Map implements Property
         $sequence2 = $sequence->map(function(User $element) use (&$called) {
             ++$called;
 
-            return $element->prop();
+            return $element->registerIndex();
         });
         Assert::assertNotSame($sequence, $sequence2);
         Assert::assertSame($sequence->size(), $sequence2->size());
         Assert::assertFalse($sequence2->equals($sequence));
         Assert::assertTrue(
             $sequence2->equals(
-                $sequence->map(fn(User $element) => $element->prop()),
+                $sequence->map(fn(User $element) => $element->registerIndex()),
             ),
             'map() is not idempotent',
         );
@@ -47,8 +47,8 @@ final class Map implements Property
             $sequence
                 ->clear()
                 ->add($this->element)
-                ->map(fn(User $element) => $element->prop())
-                ->contains($this->element->prop()),
+                ->map(fn(User $element) => $element->registerIndex())
+                ->contains($this->element->registerIndex()),
         );
         Assert::assertTrue(
             $sequence
