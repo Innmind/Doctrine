@@ -248,4 +248,25 @@ class ManagerTest extends TestCase
                 });
             });
     }
+
+    public function testAllowPeriodicFlushesInTransaction()
+    {
+        $manager = new Manager(
+            $em = $this->createMock(EntityManagerInterface::class),
+        );
+        $em
+            ->expects($this->at(0))
+            ->method('beginTransaction');
+        $em
+            ->expects($this->at(1))
+            ->method('flush');
+        $em
+            ->expects($this->at(2))
+            ->method('flush');
+        $em
+            ->expects($this->at(3))
+            ->method('commit');
+
+        $manager->transaction(fn($_, $flush) => $flush());
+    }
 }

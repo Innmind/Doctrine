@@ -61,7 +61,7 @@ final class Manager
     /**
      * @template R
      *
-     * @param callable(self): R $mutate
+     * @param callable(self, callable(): void): R $mutate The second argument allow to perform periodic flushes
      *
      * @throws NestedMutationNotSupported
      *
@@ -73,7 +73,14 @@ final class Manager
 
         try {
             $this->entityManager->beginTransaction();
-            $return = $mutate($this);
+            $return = $mutate(
+                $this,
+                function(): void {
+                    // this is fine in a transaction as the flushed entities can
+                    // be rolled back
+                    $this->entityManager->flush();
+                },
+            );
             $this->entityManager->flush();
             $this->entityManager->commit();
 
