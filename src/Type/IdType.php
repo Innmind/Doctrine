@@ -12,7 +12,7 @@ use Doctrine\DBAL\{
     Types\GuidType,
 };
 
-final class IdType extends GuidType
+class IdType extends GuidType
 {
     public function convertToPHPValue($value, AbstractPlatform $platform): ?Id
     {
@@ -26,7 +26,7 @@ final class IdType extends GuidType
             throw new LogicException("Value type must be null or string, $type given");
         }
 
-        return new Id($value);
+        return $this->instanciate($value);
     }
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
@@ -42,5 +42,10 @@ final class IdType extends GuidType
         }
 
         return $value->toString();
+    }
+
+    protected function instanciate(string $value): Id
+    {
+        return new Id($value);
     }
 }
