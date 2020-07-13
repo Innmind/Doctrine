@@ -95,7 +95,7 @@ class DeferQueryTest extends TestCase
         $this
             ->forAll(
                 Set\Integers::between(0, 100),
-                Set\Integers::between(0, 100),
+                Set\Integers::between(1, 100),
             )
             ->then(function($toDrop1, $toDrop2) {
                 $queryBuilder = $this->createMock(QueryBuilder::class);

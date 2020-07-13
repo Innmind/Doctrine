@@ -24,15 +24,15 @@
     },
     "autoload": {
         "psr-4": {
-            "Innmind\\Doctrine\\": "src/",
-            "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
-            "Properties\\Innmind\\Doctrine\\": "properties/"
+            "Innmind\\Doctrine\\": "src/"
         },
         "files": ["src/functions.php"]
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\Innmind\\Doctrine\\": "tests/",
+            "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
+            "Properties\\Innmind\\Doctrine\\": "properties/",
             "Example\\Innmind\\Doctrine\\": "example/"
         }
     },
