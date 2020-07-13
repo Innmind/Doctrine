@@ -176,3 +176,25 @@ $manager->transaction(function($manager, $flush) {
 ```
 
 **Note**: Call the `$flush` function only when in a context of imports as it will detach all the entities from entity manager, meaning if you kept references to entities they will no longer be understood by doctrine
+
+### Accessing the values inside a sequence
+
+Sometimes you may want to manipulate an array so it can be used with php functions such as `json_encode`.
+
+```php
+use Innmind\Doctrine\Sequence;
+use function Innmind\Doctrine\unwrap;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+/** @var Sequence<array{username: string, registerIndex: int}> */
+$data = $manager
+    ->repository(User::class)
+    ->all()
+    ->sort('registerIndex', 'asc')
+    ->map(static fn(User $user): array => [
+        'username' => $user->username(),
+        'registerIndex' => $user->registerIndex(),
+    ]);
+
+new JsonResponse(unwrap($data));
+```
