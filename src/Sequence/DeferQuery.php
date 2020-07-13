@@ -257,7 +257,7 @@ final class DeferQuery implements Sequence
                 yield $entity;
             }
         })(
-            $this->queryBuilder,
+            clone $this->queryBuilder,
             $this->sort,
             $this->toDrop,
             $this->toTake,
