@@ -68,6 +68,8 @@ final class Repository
 
     /**
      * @param T $entity
+     *
+     * @throws MutationOutsideOfContext
      */
     public function add(object $entity): void
     {
@@ -80,6 +82,8 @@ final class Repository
 
     /**
      * @param T $entity
+     *
+     * @throws MutationOutsideOfContext
      */
     public function remove(object $entity): void
     {
