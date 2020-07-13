@@ -84,6 +84,22 @@ class ManagerTest extends TestCase
         );
     }
 
+    public function testAllowToReturnAValueFromMutationContext()
+    {
+        $this
+            ->forAll(Set\Integers::any())
+            ->then(function($return) {
+                $manager = new Manager(
+                    $this->createMock(EntityManagerInterface::class),
+                );
+
+                $this->assertSame(
+                    $return,
+                    $manager->mutate(fn() => $return),
+                );
+            });
+    }
+
     public function testCloseTheEntityManagerWhenExceptionOccursDuringMutation()
     {
         $manager = new Manager(

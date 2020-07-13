@@ -33,16 +33,22 @@ final class Manager
     }
 
     /**
-     * @param callable(self): void $mutate
+     * @template R
+     *
+     * @param callable(self): R $mutate
      *
      * @throws NestedMutationNotSupported
+     *
+     * @return R
      */
-    public function mutate(callable $mutate): void
+    public function mutate(callable $mutate)
     {
         $this->enterMutation();
         try {
-            $mutate($this);
+            $return = $mutate($this);
             $this->entityManager->flush();
+
+            return $return;
         } catch (\Throwable $e) {
             $this->entityManager->close();
 
