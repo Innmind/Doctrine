@@ -262,9 +262,12 @@ class ManagerTest extends TestCase
             ->method('flush');
         $em
             ->expects($this->at(2))
-            ->method('flush');
+            ->method('clear');
         $em
             ->expects($this->at(3))
+            ->method('flush');
+        $em
+            ->expects($this->at(4))
             ->method('commit');
 
         $manager->transaction(fn($_, $flush) => $flush());

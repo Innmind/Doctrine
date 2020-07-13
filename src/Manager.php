@@ -79,6 +79,7 @@ final class Manager
                     // this is fine in a transaction as the flushed entities can
                     // be rolled back
                     $this->entityManager->flush();
+                    $this->entityManager->clear();
                 },
             );
             $this->entityManager->flush();
