@@ -26,7 +26,8 @@
             "Innmind\\Doctrine\\": "src/",
             "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
             "Properties\\Innmind\\Doctrine\\": "properties/"
-        }
+        },
+        "files": ["src/functions.php"]
     },
     "autoload-dev": {
         "psr-4": {
