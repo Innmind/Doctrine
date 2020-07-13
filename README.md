@@ -55,7 +55,7 @@ The unique solution (that I'm aware of) is to use `UUID`s. The `Id` provided by 
 
 ### A single `Id` class for all entities
 
-This is no longer a problem as it is provided with a template understood by [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm).
+This is no longer a problem as it is provided with a template understood by [`vimeo/psalm`](https://github.com/vimeo/psalm/blob/master/docs/annotating_code/templated_annotations.md).
 
 The class is not declared final in case you really need to extend the behaviour.
 
@@ -110,7 +110,7 @@ $manager
 
 ### Filtering
 
-It uses the [`Specification` pattern](https://en.wikipedia.org/wiki/Specification_pattern).
+It uses the [`Specification` pattern](https://en.wikipedia.org/wiki/Specification_pattern) (normalized in the library [`innmind/specification`](https://github.com/innmind/specification)).
 
 ```php
 use Example\Innmind\Doctrine\Username;
