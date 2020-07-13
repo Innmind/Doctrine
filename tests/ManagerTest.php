@@ -138,4 +138,98 @@ class ManagerTest extends TestCase
                 });
             });
     }
+
+    public function testNestedTransactionsThrows()
+    {
+        $manager = new Manager(
+            $this->createMock(EntityManagerInterface::class),
+        );
+
+        $this->expectException(NestedMutationNotSupported::class);
+
+        $manager->transaction(fn($manager) => $manager->transaction(fn() => null));
+    }
+
+    public function testRollbackWhenAnExceptionIsThrown()
+    {
+        $manager = new Manager(
+            $em = $this->createMock(EntityManagerInterface::class),
+        );
+        $em
+            ->expects($this->at(0))
+            ->method('beginTransaction');
+        $em
+            ->expects($this->at(1))
+            ->method('rollback');
+        $exception = new \Exception;
+
+        try {
+            $manager->transaction(function() use ($exception) {
+                throw $exception;
+            });
+            $this->fail('it should throw');
+        } catch (\Throwable $e) {
+            $this->assertSame($exception, $e);
+            $this->assertNull(
+                $manager->transaction(fn() => null),
+                'the manager should be healthy after a failed transaction',
+            );
+        }
+    }
+
+    public function testTransaction()
+    {
+        $this
+            ->forAll(Set\Unicode::strings())
+            ->then(function($return) {
+                $manager = new Manager(
+                    $em = $this->createMock(EntityManagerInterface::class),
+                );
+                $em
+                    ->expects($this->at(0))
+                    ->method('beginTransaction');
+                $em
+                    ->expects($this->at(1))
+                    ->method('flush');
+                $em
+                    ->expects($this->at(2))
+                    ->method('commit');
+
+                $this->assertSame(
+                    $return,
+                    $manager->transaction(fn() => $return),
+                );
+                $this->assertNull(
+                    $manager->transaction(fn() => null),
+                    'the manager should be healthy after a transaction',
+                );
+            });
+    }
+
+    public function testUseSameInstanceOfManagerInTransactionContext()
+    {
+        $manager = new Manager($this->createMock(EntityManagerInterface::class));
+
+        $this->assertNull($manager->transaction(function($inner) use ($manager) {
+            $this->assertSame($manager, $inner);
+        }));
+    }
+
+    public function testAllowMutationInTransaction()
+    {
+        $this
+            ->forAll(
+                Set\Strings::any(),
+                User::any(),
+            )
+            ->then(function($entityClass, $entity) {
+                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+
+                $manager->transaction(function($manager) use ($entityClass, $entity) {
+                    $repository = $manager->repository($entityClass);
+
+                    $this->assertNull($repository->add($entity));
+                });
+            });
+    }
 }

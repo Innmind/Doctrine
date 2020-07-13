@@ -52,6 +52,35 @@ final class Manager
         }
     }
 
+    /**
+     * @template R
+     *
+     * @param callable(self): R $mutate
+     *
+     * @throws NestedMutationNotSupported
+     *
+     * @return R
+     */
+    public function transaction(callable $mutate)
+    {
+        $this->enterMutation();
+
+        try {
+            $this->entityManager->beginTransaction();
+            $return = $mutate($this);
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+
+            return $return;
+        } catch (\Throwable $e) {
+            $this->entityManager->rollback();
+
+            throw $e;
+        } finally {
+            $this->leaveMutation();
+        }
+    }
+
     private function enterMutation(): void
     {
         if ($this->mutating) {
