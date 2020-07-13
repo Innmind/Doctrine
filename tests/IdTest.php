@@ -70,4 +70,17 @@ class IdTest extends TestCase
                 $this->assertFalse((new Id($uuid1))->equals(new Id($uuid2)));
             });
     }
+
+    public function testNewReturnAnId()
+    {
+        $this->assertInstanceOf(
+            Id::class,
+            Id::new(),
+        );
+    }
+
+    public function testNewNeverReturnsTheSameValue()
+    {
+        $this->assertFalse(Id::new()->equals(Id::new()));
+    }
 }

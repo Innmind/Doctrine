@@ -22,6 +22,11 @@ class Id
         $this->id = $id;
     }
 
+    public static function new(): self
+    {
+        return new self(Uuid::uuid4()->toString());
+    }
+
     /**
      * @param self<T> $other
      */
