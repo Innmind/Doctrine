@@ -6,6 +6,7 @@ namespace Tests\Innmind\Doctrine;
 use Innmind\Doctrine\{
     Manager,
     Repository,
+    Exception\NestedMutationNotSupported,
 };
 use Doctrine\ORM\{
     EntityManagerInterface,
@@ -43,5 +44,61 @@ class ManagerTest extends TestCase
                 $this->assertInstanceOf(Repository::class, $repository);
                 $repository->all(); // trigger getRepository assertion
             });
+    }
+
+    public function testNestedMutationThrows()
+    {
+        $manager = new Manager(
+            $this->createMock(EntityManagerInterface::class),
+        );
+
+        $this->expectException(NestedMutationNotSupported::class);
+
+        $manager->mutate(fn($manager) => $manager->mutate(fn() => null));
+    }
+
+    public function testUseSameInstanceOfManagerInMutationContext()
+    {
+        $manager = new Manager($this->createMock(EntityManagerInterface::class));
+
+        $this->assertNull($manager->mutate(function($inner) use ($manager) {
+            $this->assertSame($manager, $inner);
+        }));
+    }
+
+    public function testFlushOnceTheMutationIsDone()
+    {
+        $manager = new Manager(
+            $em = $this->createMock(EntityManagerInterface::class),
+        );
+        $em
+            ->expects($this->exactly(2))
+            ->method('flush');
+
+        $this->assertNull($manager->mutate(fn() => null));
+        $this->assertNull(
+            $manager->mutate(fn() => null),
+            'Multiple mutations should be allowed',
+        );
+    }
+
+    public function testCloseTheEntityManagerWhenExceptionOccursDuringMutation()
+    {
+        $manager = new Manager(
+            $em = $this->createMock(EntityManagerInterface::class),
+        );
+        $em
+            ->expects($this->once())
+            ->method('close');
+        $exception = new \Exception;
+
+        try {
+            $manager->mutate(function() use ($exception) {
+                throw $exception;
+            });
+            $this->fail('it should throw');
+        } catch (\Throwable $e) {
+            $this->assertSame($exception, $e);
+        }
     }
 }
