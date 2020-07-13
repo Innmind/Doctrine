@@ -1,8 +1,8 @@
 {
     "name": "innmind/doctrine",
     "type": "library",
-    "description": "",
-    "keywords": [],
+    "description": "Declarative approach to eliminate state where not necessary",
+    "keywords": ["doctrine", "declarative", "functional programming"],
     "homepage": "http://github.com/innmind/doctrine",
     "license": "MIT",
     "authors": [
@@ -15,16 +15,25 @@
         "issues": "http://github.com/innmind/doctrine/issues"
     },
     "require": {
-        "php": "~7.4"
+        "php": "~7.4",
+        "innmind/immutable": "^3.6",
+        "doctrine/orm": "^2.7",
+        "ramsey/uuid": "^4.0",
+        "innmind/specification": "^2.0",
+        "innmind/reflection": "^4.0"
     },
     "autoload": {
         "psr-4": {
-            "innmind\\doctrine\\": "src/"
-        }
+            "Innmind\\Doctrine\\": "src/",
+            "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
+            "Properties\\Innmind\\Doctrine\\": "properties/"
+        },
+        "files": ["src/functions.php"]
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\innmind\\doctrine\\": "tests/"
+            "Tests\\Innmind\\Doctrine\\": "tests/",
+            "Example\\Innmind\\Doctrine\\": "example/"
         }
     },
     "require-dev": {
