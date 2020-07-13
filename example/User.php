@@ -21,6 +21,11 @@ final class User
         $this->registerIndex = $registerIndex;
     }
 
+    public function username(): string
+    {
+        return $this->username;
+    }
+
     public function registerIndex(): int
     {
         return $this->registerIndex;
