@@ -22,6 +22,14 @@ class Id
         $this->id = $id;
     }
 
+    /**
+     * @param self<T> $other
+     */
+    public function equals(self $other): bool
+    {
+        return $this->toString() === $other->toString();
+    }
+
     final public function toString(): string
     {
         return $this->id;
