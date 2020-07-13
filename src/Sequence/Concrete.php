@@ -7,6 +7,10 @@ use Innmind\Doctrine\{
     Sequence,
     Exception\NoElementMatchingPredicateFound,
 };
+use Innmind\Reflection\{
+    ReflectionObject,
+    ExtractionStrategy,
+};
 use Innmind\Immutable;
 
 /**
@@ -187,10 +191,10 @@ final class Concrete implements Sequence
     {
         /**
          * @psalm-suppress MissingClosureParamType
-         * @psalm-suppress MixedMethodCall
+         * @psalm-suppress MixedArgument
          * @var callable(T, T): int
          */
-        $compare = static fn($a, $b): int => (int) ($a->$property() < $b->$property());
+        $compare = static fn($a, $b): int => (int) (self::extract($a, $property) < self::extract($b, $property));
 
         if ($direction === 'desc') {
             /**
@@ -253,5 +257,26 @@ final class Concrete implements Sequence
         } catch (Immutable\Exception\NoElementMatchingPredicateFound $e) {
             throw new NoElementMatchingPredicateFound;
         }
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @return mixed
+     */
+    private static function extract(object $object, string $property)
+    {
+        /** @psalm-suppress ImpureMethodCall */
+        return ReflectionObject::of(
+            $object,
+            null,
+            null,
+            new ExtractionStrategy\DelegationStrategy(
+                new ExtractionStrategy\GetterStrategy,
+                new ExtractionStrategy\NamedMethodStrategy,
+                new ExtractionStrategy\IsserStrategy,
+                new ExtractionStrategy\HasserStrategy,
+            ),
+        )->extract($property)->get($property);
     }
 }
