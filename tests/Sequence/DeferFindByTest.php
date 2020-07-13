@@ -83,6 +83,70 @@ class DeferFindByTest extends TestCase
             });
     }
 
+    public function testDropIsCumulativeWhileUnfetched()
+    {
+        $this
+            ->forAll(
+                Set\Integers::between(0, 100),
+                Set\Integers::between(0, 100),
+                Set\Elements::of('alice', 'bob', 'jane', 'john'),
+            )
+            ->then(function($toDrop1, $toDrop2, $username) {
+                $repository = $this->createMock(ObjectRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('findBy')
+                    ->with(
+                        ['username' => $username],
+                        [],
+                        null,
+                        $toDrop1 + $toDrop2,
+                    )
+                    ->willReturn([]);
+                $sequence = new DeferFindBy($repository, new Username($username));
+
+                $sequence = $sequence
+                    ->drop($toDrop1)
+                    ->drop($toDrop2);
+                $sequence->size(); // call to size is here to trigger the findBy
+                $sequence->size(); // assert findBy is called only once
+            });
+    }
+
+    public function testSortIsCumulativeWhileUnfetched()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                Set\Elements::of('asc', 'desc'),
+                $this->name(),
+                Set\Elements::of('asc', 'desc'),
+                Set\Elements::of('alice', 'bob', 'jane', 'john'),
+            )
+            ->filter(fn($property1, $direction1, $property2) => $property1 !== $property2)
+            ->then(function($property1, $direction1, $property2, $direction2, $username) {
+                $repository = $this->createMock(ObjectRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('findBy')
+                    ->with(
+                        ['username' => $username],
+                        [
+                            $property1 => $direction1,
+                            $property2 => $direction2,
+                        ],
+                    )
+                    ->willReturn([]);
+                $sequence = new DeferFindBy($repository, new Username($username));
+
+                $sequence = $sequence
+                    ->sort($property1, $direction1)
+                    ->sort($property2, $direction2);
+                $sequence->size(); // call to size is here to trigger the findBy
+                $sequence->size(); // assert findBy is called only once
+            });
+    }
+
     public function properties(): iterable
     {
         foreach (Properties::list() as $property) {
@@ -106,5 +170,16 @@ class DeferFindByTest extends TestCase
             });
 
         $this->entityManager->flush();
+    }
+
+    private function name(): Set
+    {
+        return Set\Decorate::immutable(
+            static fn(array $letters): string => \implode('', $letters),
+            Set\Sequence::of(
+                Set\Elements::of(...\range('a', 'z'), ...\range('A', 'Z')),
+                Set\Integers::between(1, 10),
+            ),
+        );
     }
 }
