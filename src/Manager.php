@@ -25,7 +25,11 @@ final class Manager
      */
     public function repository(string $class): Repository
     {
-        return new Repository($this->entityManager, $class);
+        return new Repository(
+            $this->entityManager,
+            $class,
+            fn(): bool => $this->mutating,
+        );
     }
 
     /**

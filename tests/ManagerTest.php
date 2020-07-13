@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Manager,
     Repository,
     Exception\NestedMutationNotSupported,
+    Exception\MutationOutsideOfContext,
 };
 use Doctrine\ORM\{
     EntityManagerInterface,
@@ -17,6 +18,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Doctrine\User;
 
 class ManagerTest extends TestCase
 {
@@ -100,5 +102,40 @@ class ManagerTest extends TestCase
         } catch (\Throwable $e) {
             $this->assertSame($exception, $e);
         }
+    }
+
+    public function testPreventMutationOutsideOfContext()
+    {
+        $this
+            ->forAll(
+                Set\Strings::any(),
+                User::any(),
+            )
+            ->then(function($entityClass, $entity) {
+                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+                $repository = $manager->repository($entityClass);
+
+                $this->expectException(MutationOutsideOfContext::class);
+
+                $repository->add($entity);
+            });
+    }
+
+    public function testAllowMutationInContext()
+    {
+        $this
+            ->forAll(
+                Set\Strings::any(),
+                User::any(),
+            )
+            ->then(function($entityClass, $entity) {
+                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+
+                $manager->mutate(function($manager) use ($entityClass, $entity) {
+                    $repository = $manager->repository($entityClass);
+
+                    $this->assertNull($repository->add($entity));
+                });
+            });
     }
 }

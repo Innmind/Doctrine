@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Repository,
     Sequence,
     Exception\EntityNotFound,
+    Exception\MutationOutsideOfContext,
 };
 use Doctrine\ORM\{
     EntityManagerInterface,
@@ -270,6 +271,52 @@ class RepositoryTest extends TestCase
                     Sequence\DeferQuery::class,
                     $repository->matching(new Username($username)),
                 );
+            });
+    }
+
+    public function testPreventAddingWhenNotAllowed()
+    {
+        $this
+            ->forAll(
+                Set\Strings::any(),
+                User::any()
+            )
+            ->then(function($entityClass, $entity) {
+                $repository = new Repository(
+                    $em = $this->createMock(EntityManagerInterface::class),
+                    $entityClass,
+                    fn() => false,
+                );
+                $em
+                    ->expects($this->never())
+                    ->method('persist');
+
+                $this->expectException(MutationOutsideOfContext::class);
+
+                $repository->add($entity);
+            });
+    }
+
+    public function testPreventRemovingWhenNotAllowed()
+    {
+        $this
+            ->forAll(
+                Set\Strings::any(),
+                User::any()
+            )
+            ->then(function($entityClass, $entity) {
+                $repository = new Repository(
+                    $em = $this->createMock(EntityManagerInterface::class),
+                    $entityClass,
+                    fn() => false,
+                );
+                $em
+                    ->expects($this->never())
+                    ->method('remove');
+
+                $this->expectException(MutationOutsideOfContext::class);
+
+                $repository->remove($entity);
             });
     }
 }

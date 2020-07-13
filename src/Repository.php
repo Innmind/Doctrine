@@ -6,6 +6,7 @@ namespace Innmind\Doctrine;
 use Innmind\Doctrine\{
     Specification\ToQueryBuilder,
     Exception\EntityNotFound,
+    Exception\MutationOutsideOfContext,
 };
 use Innmind\Specification\Specification;
 use Doctrine\ORM\{
@@ -21,14 +22,21 @@ final class Repository
     private EntityManagerInterface $doctrine;
     /** @var class-string<T> */
     private string $entityClass;
+    /** @var \Closure(): bool */
+    private \Closure $allowMutation;
 
     /**
      * @param class-string<T> $entityClass
+     * @param \Closure(): bool $allowMutation
      */
-    public function __construct(EntityManagerInterface $doctrine, string $entityClass)
-    {
+    public function __construct(
+        EntityManagerInterface $doctrine,
+        string $entityClass,
+        \Closure $allowMutation = null
+    ) {
         $this->doctrine = $doctrine;
         $this->entityClass = $entityClass;
+        $this->allowMutation = $allowMutation ?? static fn(): bool => true;
     }
 
     /**
@@ -63,6 +71,10 @@ final class Repository
      */
     public function add(object $entity): void
     {
+        if (!($this->allowMutation)()) {
+            throw new MutationOutsideOfContext;
+        }
+
         $this->doctrine->persist($entity);
     }
 
@@ -71,6 +83,10 @@ final class Repository
      */
     public function remove(object $entity): void
     {
+        if (!($this->allowMutation)()) {
+            throw new MutationOutsideOfContext;
+        }
+
         $this->doctrine->remove($entity);
     }
 
