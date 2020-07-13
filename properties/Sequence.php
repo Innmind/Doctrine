@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Doctrine;
 
 use Innmind\Doctrine\Sequence\Concrete;
-use Fixtures\Innmind\Doctrine\Element;
+use Fixtures\Innmind\Doctrine\User;
 use Innmind\BlackBox\{
     Set,
     Property,
@@ -28,7 +28,7 @@ final class Sequence
         return [
             Set\Property::of(
                 Sequence\Add::class,
-                Element::any(),
+                User::any(),
             ),
             Set\Property::of(
                 Sequence\SizeIsTheNumberOfItsElements::class,
@@ -61,16 +61,13 @@ final class Sequence
             ),
             Set\Property::of(
                 Sequence\Map::class,
-                Element::any(),
+                User::any(),
             ),
             Set\Property::of(
                 Sequence\AppendAtTheEnd::class,
                 Set\Decorate::immutable(
                     static fn(array $elements): Concrete => Concrete::of(...$elements),
-                    Set\Sequence::of(
-                        Element::any(),
-                        Set\Integers::between(1, 10),
-                    ),
+                    User::list(1),
                 ),
             ),
             Set\Property::of(
@@ -78,14 +75,14 @@ final class Sequence
             ),
             Set\Property::of(
                 Sequence\Find::class,
-                Element::any(),
+                User::any(),
             ),
             Set\Property::of(
                 Sequence\Sort::class,
                 Set\Composite::immutable(
                     static fn($a, $b) => [$a, $b],
-                    Element::any(),
-                    Element::any(),
+                    User::any(),
+                    User::any(),
                 )->filter(static fn($elements) => $elements[0]->prop() < $elements[1]->prop()),
             ),
         ];

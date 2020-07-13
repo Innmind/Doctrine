@@ -20,4 +20,15 @@ final class User
             Set\Integers::any(),
         );
     }
+
+    /**
+     * @return Set<list<Entity>>
+     */
+    public static function list(int $min = 0): Set
+    {
+        return Set\Sequence::of(
+            self::any(),
+            Set\Integers::between($min, 10),
+        );
+    }
 }

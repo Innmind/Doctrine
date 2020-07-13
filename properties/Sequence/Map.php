@@ -3,14 +3,15 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Doctrine\Sequence;
 
+use Example\Innmind\Doctrine\User;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
 final class Map implements Property
 {
-    private object $element;
+    private User $element;
 
-    public function __construct(object $element)
+    public function __construct(User $element)
     {
         $this->element = $element;
     }
@@ -28,7 +29,7 @@ final class Map implements Property
     public function ensureHeldBy(object $sequence): object
     {
         $called = 0;
-        $sequence2 = $sequence->map(function($element) use (&$called) {
+        $sequence2 = $sequence->map(function(User $element) use (&$called) {
             ++$called;
 
             return $element->prop();
@@ -38,7 +39,7 @@ final class Map implements Property
         Assert::assertFalse($sequence2->equals($sequence));
         Assert::assertTrue(
             $sequence2->equals(
-                $sequence->map(fn($element) => $element->prop()),
+                $sequence->map(fn(User $element) => $element->prop()),
             ),
             'map() is not idempotent',
         );
@@ -46,12 +47,12 @@ final class Map implements Property
             $sequence
                 ->clear()
                 ->add($this->element)
-                ->map(fn($element) => $element->prop())
+                ->map(fn(User $element) => $element->prop())
                 ->contains($this->element->prop()),
         );
         Assert::assertTrue(
             $sequence
-                ->map(fn($element) => $element)
+                ->map(fn(User $element) => $element)
                 ->equals($sequence),
             'identity map must not have side effects',
         );

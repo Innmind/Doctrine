@@ -20,10 +20,10 @@ use Innmind\BlackBox\{
 };
 use Fixtures\Innmind\Doctrine\{
     Id,
-    Element,
+    User,
 };
 use Example\Innmind\Doctrine\{
-    User,
+    User as Entity,
     Username,
 };
 
@@ -61,7 +61,7 @@ class RepositoryTest extends TestCase
             ->forAll(
                 Id::any(),
                 Set\Unicode::strings(),
-                Element::any(),
+                User::any(),
             )
             ->then(function($id, $entityClass, $entity) {
                 $repository = new Repository(
@@ -84,7 +84,7 @@ class RepositoryTest extends TestCase
             ->forAll(
                 Id::any(),
                 Set\Unicode::strings(),
-                Element::any(),
+                User::any(),
             )
             ->then(function($id, $entityClass, $entity) {
                 $repository = new Repository(
@@ -124,7 +124,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Unicode::strings(),
-                Element::any(),
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(
@@ -145,7 +145,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Unicode::strings(),
-                Element::any(),
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(
@@ -166,9 +166,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Unicode::strings(),
-                Set\Sequence::of(
-                    Element::any(),
-                ),
+                User::list(),
             )
             ->then(function($entityClass, $entities) {
                 $repository = new Repository(
@@ -235,7 +233,7 @@ class RepositoryTest extends TestCase
 
                 $repository = new Repository(
                     $doctrine,
-                    User::class,
+                    Entity::class,
                 );
 
                 $this->assertInstanceOf(

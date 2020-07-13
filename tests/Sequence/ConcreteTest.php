@@ -12,7 +12,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
-use Fixtures\Innmind\Doctrine\Element;
+use Fixtures\Innmind\Doctrine\User;
 use Properties\Innmind\Doctrine\Sequence as Properties;
 
 class ConcreteTest extends TestCase
@@ -29,10 +29,7 @@ class ConcreteTest extends TestCase
         $this
             ->forAll(
                 Properties::properties(),
-                Set\Sequence::of(
-                    Element::any(),
-                    Set\Integers::between(0, 5),
-                ),
+                User::list(),
             )
             ->then(function($properties, $elements) {
                 $properties->ensureHeldBy(Concrete::of(...$elements));
@@ -44,10 +41,7 @@ class ConcreteTest extends TestCase
         $this
             ->forAll(
                 Properties::properties(),
-                Set\Sequence::of(
-                    Element::any(),
-                    Set\Integers::between(0, 5),
-                ),
+                User::list(),
             )
             ->then(function($properties, $elements) {
                 $properties->ensureHeldBy(Concrete::defer((function($elements) {

@@ -4,13 +4,14 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Doctrine\Sequence;
 
 use Innmind\Doctrine\Sequence;
+use Example\Innmind\Doctrine\User;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
 final class Sort implements Property
 {
-    private object $min;
-    private object $max;
+    private User $min;
+    private User $max;
 
     public function __construct(array $elements)
     {

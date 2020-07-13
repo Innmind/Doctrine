@@ -3,14 +3,15 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Doctrine\Sequence;
 
+use Example\Innmind\Doctrine\User;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
 final class Add implements Property
 {
-    private object $element;
+    private User $element;
 
-    public function __construct(object $element)
+    public function __construct(User $element)
     {
         $this->element = $element;
     }
@@ -47,7 +48,7 @@ final class Add implements Property
             $sequence2->take($sequence->size())->equals($sequence),
             'Initial part of the sequence must not be altered',
         );
-        $element = $sequence2->reduce(null, fn($_, $element) => $element);
+        $element = $sequence2->reduce(null, fn($_, User $element) => $element);
         Assert::assertSame($this->element, $element);
 
         return $sequence2;
