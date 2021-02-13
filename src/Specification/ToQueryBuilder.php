@@ -184,7 +184,7 @@ final class ToQueryBuilder
      */
     private function placeholder($value, QueryBuilder $qb): string
     {
-        /** @psalm-suppress ImpurePropertyAssignment */
+        /** @psalm-suppress InaccessibleProperty */
         ++$this->count;
         $qb->setParameter($this->count, $value);
 
