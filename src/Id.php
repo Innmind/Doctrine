@@ -22,6 +22,16 @@ class Id
         $this->id = $id;
     }
 
+    /**
+     * This method is required by Doctrine as all ids must be castable to string
+     *
+     * @internal Never use this method in your code
+     */
+    final public function __toString(): string
+    {
+        return $this->id;
+    }
+
     public static function new(): self
     {
         return new self(Uuid::uuid4()->toString());
@@ -36,16 +46,6 @@ class Id
     }
 
     final public function toString(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * This method is required by Doctrine as all ids must be castable to string
-     *
-     * @internal Never use this method in your code
-     */
-    final public function __toString(): string
     {
         return $this->id;
     }

@@ -74,7 +74,6 @@ final class ToQueryBuilder
             throw new SpecificationNotSuported(\get_class($specification));
         }
 
-
         if ($specification->operator()->equals(Operator::and())) {
             /** @psalm-suppress ImpureMethodCall */
             return $qb

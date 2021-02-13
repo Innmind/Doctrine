@@ -31,7 +31,7 @@ final class Drop implements Property
         Assert::assertNotSame($sequence, $sequence2);
         Assert::assertFalse($sequence->equals($sequence2));
         Assert::assertLessThan($sequence->size(), $sequence2->size());
-        $sequence2->foreach(fn($element) => Assert::assertTrue($sequence->contains($element)));
+        $sequence2->foreach(static fn($element) => Assert::assertTrue($sequence->contains($element)));
         Assert::assertTrue(
             $sequence2->equals($sequence->drop($this->number)),
             'drop() is not idempotent',

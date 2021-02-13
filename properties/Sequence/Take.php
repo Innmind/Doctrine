@@ -31,7 +31,7 @@ final class Take implements Property
         Assert::assertNotSame($sequence, $sequence2);
         Assert::assertLessThanOrEqual($sequence->size(), $sequence2->size());
         Assert::assertLessThanOrEqual($this->number, $sequence2->size());
-        $sequence2->foreach(fn($element) => Assert::assertTrue($sequence->contains($element)));
+        $sequence2->foreach(static fn($element) => Assert::assertTrue($sequence->contains($element)));
         Assert::assertTrue(
             $sequence2->equals($sequence->take($this->number)),
             'take() is not idempotent',

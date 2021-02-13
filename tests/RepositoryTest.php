@@ -190,7 +190,7 @@ class RepositoryTest extends TestCase
                         ->all()
                         ->reduce(
                             [],
-                            function($entities, $entity) {
+                            static function($entities, $entity) {
                                 $entities[] = $entity;
 
                                 return $entities;
@@ -285,7 +285,7 @@ class RepositoryTest extends TestCase
                 $repository = new Repository(
                     $em = $this->createMock(EntityManagerInterface::class),
                     $entityClass,
-                    fn() => false,
+                    static fn() => false,
                 );
                 $em
                     ->expects($this->never())
@@ -308,7 +308,7 @@ class RepositoryTest extends TestCase
                 $repository = new Repository(
                     $em = $this->createMock(EntityManagerInterface::class),
                     $entityClass,
-                    fn() => false,
+                    static fn() => false,
                 );
                 $em
                     ->expects($this->never())

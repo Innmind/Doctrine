@@ -22,14 +22,14 @@ final class ForeachCallElementsInOrder implements Property
     {
         $expected = $sequence->reduce(
             [],
-            function($elements, $element) {
+            static function($elements, $element) {
                 $elements[] = $element;
 
                 return $elements;
             },
         );
         $elements = [];
-        $sequence->foreach(function($element) use (&$elements) {
+        $sequence->foreach(static function($element) use (&$elements) {
             $elements[] = $element;
         });
         Assert::assertSame($expected, $elements);

@@ -22,7 +22,7 @@ final class SizeIsTheNumberOfItsElements implements Property
     {
         $elements = $sequence->reduce(
             [],
-            function($elements, $element) {
+            static function($elements, $element) {
                 $elements[] = $element;
 
                 return $elements;

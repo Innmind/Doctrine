@@ -246,9 +246,9 @@ final class Concrete implements Sequence
     /**
      * Find first value matching the predicate
      *
-     * @throws NoElementMatchingPredicateFound
-     *
      * @param callable(T): bool $predicate
+     *
+     * @throws NoElementMatchingPredicateFound
      *
      * @return T
      */

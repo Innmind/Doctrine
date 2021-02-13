@@ -213,9 +213,9 @@ final class DeferFindBy implements Sequence
     /**
      * Find first value matching the predicate
      *
-     * @throws NoElementMatchingPredicateFound
-     *
      * @param callable(T): bool $predicate
+     *
+     * @throws NoElementMatchingPredicateFound
      *
      * @return T
      */
@@ -230,7 +230,7 @@ final class DeferFindBy implements Sequence
     private function unwrap(): Sequence
     {
         /** @var Sequence<T> */
-        return $this->fetched ??= Concrete::defer((function(
+        return $this->fetched ??= Concrete::defer((static function(
             ObjectRepository $repository,
             Specification $specification,
             array $sort,
