@@ -163,7 +163,10 @@ final class Concrete implements Sequence
      */
     public function append(Sequence $other): self
     {
-        /** @psalm-suppress ImpureMethodCall */
+        /**
+         * @psalm-suppress ImpureMethodCall
+         * @psalm-suppress MixedArgument
+         */
         return $other->reduce(
             $this,
             static fn(self $new, $element): self => $new->add($element),
