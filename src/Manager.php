@@ -44,6 +44,7 @@ final class Manager
     public function mutate(callable $mutate)
     {
         $this->enterMutation();
+
         try {
             $return = $mutate($this);
             $this->entityManager->flush();

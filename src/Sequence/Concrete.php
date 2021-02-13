@@ -163,7 +163,10 @@ final class Concrete implements Sequence
      */
     public function append(Sequence $other): self
     {
-        /** @psalm-suppress ImpureMethodCall */
+        /**
+         * @psalm-suppress ImpureMethodCall
+         * @psalm-suppress MixedArgument
+         */
         return $other->reduce(
             $this,
             static fn(self $new, $element): self => $new->add($element),
@@ -194,7 +197,7 @@ final class Concrete implements Sequence
          * @psalm-suppress MixedArgument
          * @var callable(T, T): int
          */
-        $compare = static fn($a, $b): int => (int) (self::extract($a, $property) < self::extract($b, $property));
+        $compare = static fn($a, $b): int => (self::extract($b, $property) <=> self::extract($a, $property));
 
         if ($direction === 'desc') {
             /**
@@ -243,9 +246,9 @@ final class Concrete implements Sequence
     /**
      * Find first value matching the predicate
      *
-     * @throws NoElementMatchingPredicateFound
-     *
      * @param callable(T): bool $predicate
+     *
+     * @throws NoElementMatchingPredicateFound
      *
      * @return T
      */

@@ -78,7 +78,7 @@ class ToArrayTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::matching('[a-zA-Z]+'),
+                $this->property(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -107,9 +107,9 @@ class ToArrayTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::matching('[a-zA-Z]+'),
+                $this->property(),
                 Set\Unicode::strings(),
-                Set\Strings::matching('[a-zA-Z]+'),
+                $this->property(),
                 Set\Unicode::strings(),
             )
             ->then(function($leftProperty, $leftValue, $rightProperty, $rightValue) {
@@ -161,5 +161,22 @@ class ToArrayTest extends TestCase
                     (new ToArray)($and),
                 );
             });
+    }
+
+    private function property(): Set
+    {
+        return Set\Decorate::immutable(
+            static fn(array $chars) => \implode('', $chars),
+            Set\Sequence::of(
+                Set\Decorate::immutable(
+                    static fn(int $ord) => \chr($ord),
+                    new Set\Either(
+                        Set\Integers::between(65, 90), // A-Z
+                        Set\Integers::between(97, 122), // a-z
+                    ),
+                ),
+                Set\Integers::between(1, 50),
+            ),
+        );
     }
 }

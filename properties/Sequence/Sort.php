@@ -58,7 +58,7 @@ final class Sort implements Property
     {
         return $sequence->reduce(
             [],
-            function($elements, $element) {
+            static function($elements, $element) {
                 $elements[] = $element;
 
                 return $elements;

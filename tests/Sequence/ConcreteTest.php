@@ -31,7 +31,7 @@ class ConcreteTest extends TestCase
                 Properties::properties(),
                 User::list(),
             )
-            ->then(function($properties, $elements) {
+            ->then(static function($properties, $elements) {
                 $properties->ensureHeldBy(Concrete::of(...$elements));
             });
     }
@@ -43,8 +43,8 @@ class ConcreteTest extends TestCase
                 Properties::properties(),
                 User::list(),
             )
-            ->then(function($properties, $elements) {
-                $properties->ensureHeldBy(Concrete::defer((function($elements) {
+            ->then(static function($properties, $elements) {
+                $properties->ensureHeldBy(Concrete::defer((static function($elements) {
                     yield from $elements;
                 })($elements)));
             });

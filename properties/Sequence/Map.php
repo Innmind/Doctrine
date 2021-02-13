@@ -29,7 +29,7 @@ final class Map implements Property
     public function ensureHeldBy(object $sequence): object
     {
         $called = 0;
-        $sequence2 = $sequence->map(function(User $element) use (&$called) {
+        $sequence2 = $sequence->map(static function(User $element) use (&$called) {
             ++$called;
 
             return $element->registerIndex();
@@ -39,7 +39,7 @@ final class Map implements Property
         Assert::assertFalse($sequence2->equals($sequence));
         Assert::assertTrue(
             $sequence2->equals(
-                $sequence->map(fn(User $element) => $element->registerIndex()),
+                $sequence->map(static fn(User $element) => $element->registerIndex()),
             ),
             'map() is not idempotent',
         );
@@ -52,7 +52,7 @@ final class Map implements Property
         );
         Assert::assertTrue(
             $sequence
-                ->map(fn(User $element) => $element)
+                ->map(static fn(User $element) => $element)
                 ->equals($sequence),
             'identity map must not have side effects',
         );

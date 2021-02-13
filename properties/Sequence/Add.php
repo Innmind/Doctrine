@@ -48,7 +48,7 @@ final class Add implements Property
             $sequence2->take($sequence->size())->equals($sequence),
             'Initial part of the sequence must not be altered',
         );
-        $element = $sequence2->reduce(null, fn($_, User $element) => $element);
+        $element = $sequence2->reduce(null, static fn($_, User $element) => $element);
         Assert::assertSame($this->element, $element);
 
         return $sequence2;

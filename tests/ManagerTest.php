@@ -56,7 +56,7 @@ class ManagerTest extends TestCase
 
         $this->expectException(NestedMutationNotSupported::class);
 
-        $manager->mutate(fn($manager) => $manager->mutate(fn() => null));
+        $manager->mutate(static fn($manager) => $manager->mutate(static fn() => null));
     }
 
     public function testUseSameInstanceOfManagerInMutationContext()
@@ -77,9 +77,9 @@ class ManagerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('flush');
 
-        $this->assertNull($manager->mutate(fn() => null));
+        $this->assertNull($manager->mutate(static fn() => null));
         $this->assertNull(
-            $manager->mutate(fn() => null),
+            $manager->mutate(static fn() => null),
             'Multiple mutations should be allowed',
         );
     }
@@ -95,7 +95,7 @@ class ManagerTest extends TestCase
 
                 $this->assertSame(
                     $return,
-                    $manager->mutate(fn() => $return),
+                    $manager->mutate(static fn() => $return),
                 );
             });
     }
@@ -111,7 +111,7 @@ class ManagerTest extends TestCase
         $exception = new \Exception;
 
         try {
-            $manager->mutate(function() use ($exception) {
+            $manager->mutate(static function() use ($exception) {
                 throw $exception;
             });
             $this->fail('it should throw');
@@ -163,7 +163,7 @@ class ManagerTest extends TestCase
 
         $this->expectException(NestedMutationNotSupported::class);
 
-        $manager->transaction(fn($manager) => $manager->transaction(fn() => null));
+        $manager->transaction(static fn($manager) => $manager->transaction(static fn() => null));
     }
 
     public function testRollbackWhenAnExceptionIsThrown()
@@ -172,22 +172,22 @@ class ManagerTest extends TestCase
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('beginTransaction');
         $em
-            ->expects($this->at(1))
+            ->expects($this->once())
             ->method('rollback');
         $exception = new \Exception;
 
         try {
-            $manager->transaction(function() use ($exception) {
+            $manager->transaction(static function() use ($exception) {
                 throw $exception;
             });
             $this->fail('it should throw');
         } catch (\Throwable $e) {
             $this->assertSame($exception, $e);
             $this->assertNull(
-                $manager->transaction(fn() => null),
+                $manager->transaction(static fn() => null),
                 'the manager should be healthy after a failed transaction',
             );
         }
@@ -202,21 +202,21 @@ class ManagerTest extends TestCase
                     $em = $this->createMock(EntityManagerInterface::class),
                 );
                 $em
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('beginTransaction');
                 $em
-                    ->expects($this->at(1))
+                    ->expects($this->exactly(2))
                     ->method('flush');
                 $em
-                    ->expects($this->at(2))
+                    ->expects($this->exactly(2))
                     ->method('commit');
 
                 $this->assertSame(
                     $return,
-                    $manager->transaction(fn() => $return),
+                    $manager->transaction(static fn() => $return),
                 );
                 $this->assertNull(
-                    $manager->transaction(fn() => null),
+                    $manager->transaction(static fn() => null),
                     'the manager should be healthy after a transaction',
                 );
             });
@@ -255,21 +255,18 @@ class ManagerTest extends TestCase
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('beginTransaction');
         $em
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('flush');
         $em
-            ->expects($this->at(2))
+            ->expects($this->once())
             ->method('clear');
         $em
-            ->expects($this->at(3))
-            ->method('flush');
-        $em
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('commit');
 
-        $manager->transaction(fn($_, $flush) => $flush());
+        $manager->transaction(static fn($_, $flush) => $flush());
     }
 }

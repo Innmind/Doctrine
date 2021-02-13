@@ -20,8 +20,8 @@ final class FilteringEmptySequenceHasNoEffect implements Property
 
     public function ensureHeldBy(object $sequence): object
     {
-        Assert::assertTrue($sequence->filter(fn() => false)->empty());
-        Assert::assertTrue($sequence->filter(fn() => true)->empty());
+        Assert::assertTrue($sequence->filter(static fn() => false)->empty());
+        Assert::assertTrue($sequence->filter(static fn() => true)->empty());
 
         return $sequence;
     }

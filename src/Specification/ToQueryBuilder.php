@@ -74,7 +74,6 @@ final class ToQueryBuilder
             throw new SpecificationNotSuported(\get_class($specification));
         }
 
-
         if ($specification->operator()->equals(Operator::and())) {
             /** @psalm-suppress ImpureMethodCall */
             return $qb
@@ -184,7 +183,7 @@ final class ToQueryBuilder
      */
     private function placeholder($value, QueryBuilder $qb): string
     {
-        /** @psalm-suppress ImpurePropertyAssignment */
+        /** @psalm-suppress InaccessibleProperty */
         ++$this->count;
         $qb->setParameter($this->count, $value);
 
