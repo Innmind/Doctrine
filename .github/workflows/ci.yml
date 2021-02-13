@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php-version: ['7.4']
-    name: 'PHPUnit - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
+    name: 'PHPUnit'
     services:
       mariadb:
         image: mariadb:10
@@ -53,7 +53,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php-version: ['7.4']
-    name: 'Coverage - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
+    name: 'Coverage'
     services:
       mariadb:
         image: mariadb:10
@@ -99,7 +99,7 @@ jobs:
     strategy:
       matrix:
         php-version: ['7.4']
-    name: 'Psalm - PHP/${{ matrix.php-version }}'
+    name: 'Psalm'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
