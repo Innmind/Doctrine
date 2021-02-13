@@ -197,7 +197,7 @@ final class Concrete implements Sequence
          * @psalm-suppress MixedArgument
          * @var callable(T, T): int
          */
-        $compare = static fn($a, $b): int => (int) (self::extract($a, $property) < self::extract($b, $property));
+        $compare = static fn($a, $b): int => (self::extract($b, $property) <=> self::extract($a, $property));
 
         if ($direction === 'desc') {
             /**
