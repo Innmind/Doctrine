@@ -134,13 +134,12 @@ class DeferQueryTest extends TestCase
             ->then(function($property1, $direction1, $property2, $direction2) {
                 $queryBuilder = $this->createMock(QueryBuilder::class);
                 $queryBuilder
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('addOrderBy')
-                    ->with("entity.$property1", $direction1);
-                $queryBuilder
-                    ->expects($this->at(1))
-                    ->method('addOrderBy')
-                    ->with("entity.$property2", $direction2);
+                    ->withConsecutive(
+                        ["entity.$property1", $direction1],
+                        ["entity.$property2", $direction2],
+                    );
                 $queryBuilder
                     ->expects($this->once())
                     ->method('getQuery')

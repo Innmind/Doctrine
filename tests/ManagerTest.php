@@ -172,10 +172,10 @@ class ManagerTest extends TestCase
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('beginTransaction');
         $em
-            ->expects($this->at(1))
+            ->expects($this->once())
             ->method('rollback');
         $exception = new \Exception;
 
@@ -202,13 +202,13 @@ class ManagerTest extends TestCase
                     $em = $this->createMock(EntityManagerInterface::class),
                 );
                 $em
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('beginTransaction');
                 $em
-                    ->expects($this->at(1))
+                    ->expects($this->exactly(2))
                     ->method('flush');
                 $em
-                    ->expects($this->at(2))
+                    ->expects($this->exactly(2))
                     ->method('commit');
 
                 $this->assertSame(
@@ -255,19 +255,16 @@ class ManagerTest extends TestCase
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('beginTransaction');
         $em
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('flush');
         $em
-            ->expects($this->at(2))
+            ->expects($this->once())
             ->method('clear');
         $em
-            ->expects($this->at(3))
-            ->method('flush');
-        $em
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('commit');
 
         $manager->transaction(fn($_, $flush) => $flush());
