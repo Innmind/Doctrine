@@ -198,3 +198,23 @@ $data = $manager
 
 new JsonResponse(unwrap($data));
 ```
+
+### Filtering on relations
+
+You can specify the property of an entity relationship in a specification property field.
+
+```php
+use Example\Innmind\Doctrine\Child;
+
+$users = $manager
+    ->repository(User::class)
+    ->matching(
+        Child::of('alice')->or(
+            Child::of('jane'),
+        ),
+    );
+```
+
+The `Child` specification use the property `children.username` thus specifying the username of a user's children.
+
+**Note**: for now only one level relationship is allowed in a specification property.

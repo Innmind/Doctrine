@@ -32,6 +32,11 @@ final class ToQueryBuilder
     private EntityRepository $repository;
     /** @psalm-allow-private-mutation */
     private int $count = 0;
+    /**
+     * @psalm-allow-private-mutation
+     * @var list<string>
+     */
+    private array $relations = [];
 
     public function __construct(EntityRepository $repository)
     {
@@ -43,11 +48,20 @@ final class ToQueryBuilder
     {
         /** @psalm-suppress InaccessibleProperty */
         $this->count = 0;
+        /** @psalm-suppress InaccessibleProperty */
+        $this->relations = [];
 
         /** @psalm-suppress ImpureMethodCall */
         $qb = $this->repository->createQueryBuilder('entity');
         /** @var mixed */
         $expression = $this->visit($specification, $qb);
+        $relations = \array_unique($this->relations);
+
+        /** @var string $relation */
+        foreach ($relations as $relation) {
+            /** @psalm-suppress ImpureMethodCall */
+            $qb->leftJoin("entity.$relation", $relation);
+        }
 
         /** @psalm-suppress ImpureMethodCall */
         return $qb->where($expression);
@@ -99,6 +113,12 @@ final class ToQueryBuilder
     private function expression(Comparator $specification, QueryBuilder $qb)
     {
         $property = "entity.{$specification->property()}";
+
+        if (\strpos($specification->property(), '.') !== false) {
+            [$relation] = \explode('.', $specification->property());
+            $this->relations[] = $relation;
+            $property = $specification->property();
+        }
 
         switch ($specification->sign()) {
             case Sign::equality():

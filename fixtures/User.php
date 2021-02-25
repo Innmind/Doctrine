@@ -12,17 +12,19 @@ final class User
     /**
      * @return Set<Entity>
      */
-    public static function any(): Set
+    public static function any(Set $children = null): Set
     {
         return Set\Composite::mutable(
-            static fn($uuid, $name, $registerIndex): Entity => new Entity(
+            static fn($uuid, $name, $registerIndex, $children): Entity => new Entity(
                 new Id($uuid),
                 $name,
                 $registerIndex,
+                $children,
             ),
             Set\Uuid::any(),
             Set\Elements::of('alice', 'bob', 'jane', 'john'),
             Set\Integers::any(),
+            $children ? $children : Set\Elements::of([]),
         );
     }
 
@@ -32,7 +34,7 @@ final class User
     public static function list(int $min = 0): Set
     {
         return Set\Sequence::of(
-            self::any(),
+            new Set\Randomize(self::any()),
             Set\Integers::between($min, 10),
         );
     }

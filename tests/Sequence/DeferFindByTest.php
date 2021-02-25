@@ -159,7 +159,7 @@ class DeferFindByTest extends TestCase
         $this
             ->entityManager
             ->getConnection()
-            ->executeUpdate('DELETE FROM user');
+            ->executeUpdate('TRUNCATE TABLE user');
 
         $this
             ->forAll(User::any())
