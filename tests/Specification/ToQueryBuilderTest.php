@@ -725,6 +725,113 @@ class ToQueryBuilderTest extends TestCase
             });
     }
 
+    public function testMatchRelation()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                $this->name(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($relation, $property, $value) {
+                $specification = $this->createMock(Comparator::class);
+                $specification
+                    ->method('property')
+                    ->willReturn("$relation.$property");
+                $specification
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specification
+                    ->method('value')
+                    ->willReturn($value);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+                // needed for the left join to work
+                $expected
+                    ->select('entity')
+                    ->from('Entity', 'entity');
+
+                $qb = (new ToQueryBuilder($repository))($specification);
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$property} = ?1", (string) $qb);
+                $this->assertSame($value, $qb->getParameter(1)->getValue());
+            });
+    }
+
+    public function testRelationIsLoadedOnceWhenMultipleConditionOnInt()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                $this->name(),
+                Set\Unicode::strings(),
+                $this->name(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($relation, $leftProperty, $leftValue, $rightProperty, $rightValue) {
+                $left = $this->createMock(Comparator::class);
+                $left
+                    ->method('property')
+                    ->willReturn("$relation.$leftProperty");
+                $left
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $left
+                    ->method('value')
+                    ->willReturn($leftValue);
+                $right = $this->createMock(Comparator::class);
+                $right
+                    ->method('property')
+                    ->willReturn("$relation.$rightProperty");
+                $right
+                    ->method('sign')
+                    ->willReturn(Sign::inequality());
+                $right
+                    ->method('value')
+                    ->willReturn($rightValue);
+                $specification = $this->createMock(Composite::class);
+                $specification
+                    ->method('left')
+                    ->willReturn($left);
+                $specification
+                    ->method('right')
+                    ->willReturn($right);
+                $specification
+                    ->method('operator')
+                    ->willReturn(Operator::and());
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+                // needed for the left join to work
+                $expected
+                    ->select('entity')
+                    ->from('Entity', 'entity');
+
+                $qb = (new ToQueryBuilder($repository))($specification);
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$leftProperty} = ?1 AND {$relation}.{$rightProperty} <> ?2", (string) $qb);
+                $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
+                $this->assertSame($rightValue, $qb->getParameter(2)->getValue());
+            });
+    }
+
     private function name(): Set
     {
         return Set\Decorate::immutable(

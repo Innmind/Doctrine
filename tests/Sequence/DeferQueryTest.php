@@ -22,6 +22,7 @@ use Properties\Innmind\Doctrine\Sequence as Properties;
 use Example\Innmind\Doctrine\{
     User as Entity,
     Username,
+    Child,
 };
 
 class DeferQueryTest extends TestCase
@@ -158,6 +159,30 @@ class DeferQueryTest extends TestCase
             });
     }
 
+    public function testCorrectlyLoadRelations()
+    {
+        $this->load(User::list());
+
+        $this
+            ->forAll(
+                Set\Elements::of('alice', 'bob', 'jane', 'john'),
+                Set\Elements::of('alice', 'bob', 'jane', 'john'),
+            )
+            ->then(function($username1, $username2) {
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                );
+
+                $sequence = new DeferQuery(
+                    $qb(Child::of($username1)->or(Child::of($username2))),
+                );
+
+                $sequence->foreach(function($user) use ($username1, $username2) {
+                    $this->assertTrue($user->hasChild($username1, $username2));
+                });
+            });
+    }
+
     public function properties(): iterable
     {
         foreach (Properties::list() as $property) {
@@ -165,15 +190,15 @@ class DeferQueryTest extends TestCase
         }
     }
 
-    private function load(): void
+    private function load(Set $children = null): void
     {
         $this
             ->entityManager
             ->getConnection()
-            ->executeUpdate('DELETE FROM user');
+            ->executeUpdate('TRUNCATE TABLE user');
 
         $this
-            ->forAll(User::any())
+            ->forAll(User::any($children))
             ->disableShrinking()
             ->take($this->seeder()(Set\Integers::between(0, 100)))
             ->then(function($user) {

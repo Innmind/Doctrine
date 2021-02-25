@@ -5,5 +5,11 @@
         </id>
         <field name="username" type="string" />
         <field name="registerIndex" type="bigint" />
+        <one-to-many field="children" target-entity="Example\Innmind\Doctrine\User" mapped-by="parent">
+            <cascade>
+                <cascade-all/>
+            </cascade>
+        </one-to-many>
+        <many-to-one field="parent" target-entity="Example\Innmind\Doctrine\User" />
     </entity>
 </doctrine-mapping>
