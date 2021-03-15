@@ -248,7 +248,7 @@ class RepositoryTest extends TestCase
 
                 $this->assertInstanceOf(
                     Sequence\DeferFindBy::class,
-                    $repository->matching(new Username($username)),
+                    $repository->matching(Username::of($username)),
                 );
             });
     }
@@ -269,7 +269,7 @@ class RepositoryTest extends TestCase
 
                 $this->assertInstanceOf(
                     Sequence\DeferQuery::class,
-                    $repository->matching(new Username($username)),
+                    $repository->matching(Username::of($username)),
                 );
             });
     }

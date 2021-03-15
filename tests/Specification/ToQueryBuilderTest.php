@@ -469,7 +469,7 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$property} IN('?1')", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$property} IN(?1)", (string) $qb);
                 $this->assertSame($values, $qb->getParameter(1)->getValue());
             });
     }

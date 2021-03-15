@@ -54,7 +54,7 @@ class DeferFindByTest extends TestCase
             ->then(function($properties, $username) {
                 $properties->ensureHeldBy(new DeferFindBy(
                     $this->entityManager->getRepository(Entity::class),
-                    new Username($username),
+                    Username::of($username),
                 ));
             });
     }
@@ -72,7 +72,7 @@ class DeferFindByTest extends TestCase
             ->then(function($property, $username) {
                 $sequence = new DeferFindBy(
                     $this->entityManager->getRepository(Entity::class),
-                    new Username($username),
+                    Username::of($username),
                 );
 
                 if (!$property->applicableTo($sequence)) {
@@ -103,7 +103,7 @@ class DeferFindByTest extends TestCase
                         $toDrop1 + $toDrop2,
                     )
                     ->willReturn([]);
-                $sequence = new DeferFindBy($repository, new Username($username));
+                $sequence = new DeferFindBy($repository, Username::of($username));
 
                 $sequence = $sequence
                     ->drop($toDrop1)
@@ -137,7 +137,7 @@ class DeferFindByTest extends TestCase
                         ],
                     )
                     ->willReturn([]);
-                $sequence = new DeferFindBy($repository, new Username($username));
+                $sequence = new DeferFindBy($repository, Username::of($username));
 
                 $sequence = $sequence
                     ->sort($property1, $direction1)

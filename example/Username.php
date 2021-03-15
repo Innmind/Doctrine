@@ -12,16 +12,23 @@ final class Username implements Comparator
 {
     use Composable;
 
-    private string $username;
+    private $value;
+    private Sign $sign;
 
-    public function __construct(string $username)
+    private function __construct($value, Sign $sign)
     {
-        $this->username = $username;
+        $this->value = $value;
+        $this->sign = $sign;
     }
 
     public static function of(string $username): self
     {
-        return new self($username);
+        return new self($username, Sign::equality());
+    }
+
+    public static function in(string ...$usernames): self
+    {
+        return new self($usernames, Sign::in());
     }
 
     public function property(): string
@@ -31,11 +38,11 @@ final class Username implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return $this->sign;
     }
 
-    public function value(): string
+    public function value()
     {
-        return $this->username;
+        return $this->value;
     }
 }
