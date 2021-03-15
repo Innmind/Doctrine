@@ -60,7 +60,7 @@ class DeferQueryTest extends TestCase
                 );
 
                 $properties->ensureHeldBy(new DeferQuery(
-                    $qb(new Username($username)),
+                    $qb(Username::of($username)),
                 ));
             });
     }
@@ -80,7 +80,7 @@ class DeferQueryTest extends TestCase
                     $this->entityManager->getRepository(Entity::class),
                 );
                 $sequence = new DeferQuery(
-                    $qb(new Username($username)),
+                    $qb(Username::of($username)),
                 );
 
                 if (!$property->applicableTo($sequence)) {
@@ -179,6 +179,27 @@ class DeferQueryTest extends TestCase
 
                 $sequence->foreach(function($user) use ($username1, $username2) {
                     $this->assertTrue($user->hasChild($username1, $username2));
+                });
+            });
+    }
+
+    public function testSearchInUsername()
+    {
+        $this
+            ->forAll(Set\Sequence::of(
+                Set\Elements::of('alice', 'bob', 'jane', 'john'),
+                Set\Integers::between(1, 4),
+            ))
+            ->then(function($usernames) {
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                );
+                $sequence = new DeferQuery(
+                    $qb(Username::in(...$usernames)),
+                );
+
+                $sequence->foreach(function($user) use ($usernames) {
+                    $this->assertContains($user->username(), $usernames);
                 });
             });
     }

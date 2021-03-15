@@ -190,7 +190,7 @@ final class ToQueryBuilder
                     $qb,
                 );
 
-                return $qb->expr()->in($property, [$placeholder]);
+                return $qb->expr()->in($property, $placeholder);
         }
 
         throw new ComparisonNotSupported((string) $specification->sign());
