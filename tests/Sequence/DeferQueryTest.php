@@ -23,6 +23,7 @@ use Example\Innmind\Doctrine\{
     User as Entity,
     Username,
     Child,
+    MultiType,
 };
 
 class DeferQueryTest extends TestCase
@@ -57,6 +58,7 @@ class DeferQueryTest extends TestCase
             ->then(function($properties, $username) {
                 $qb = new ToQueryBuilder(
                     $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
                 );
 
                 $properties->ensureHeldBy(new DeferQuery(
@@ -78,6 +80,7 @@ class DeferQueryTest extends TestCase
             ->then(function($property, $username) {
                 $qb = new ToQueryBuilder(
                     $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
                 );
                 $sequence = new DeferQuery(
                     $qb(Username::of($username)),
@@ -171,6 +174,7 @@ class DeferQueryTest extends TestCase
             ->then(function($username1, $username2) {
                 $qb = new ToQueryBuilder(
                     $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
                 );
 
                 $sequence = new DeferQuery(
@@ -193,6 +197,7 @@ class DeferQueryTest extends TestCase
             ->then(function($usernames) {
                 $qb = new ToQueryBuilder(
                     $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
                 );
                 $sequence = new DeferQuery(
                     $qb(Username::in(...$usernames)),
@@ -201,6 +206,112 @@ class DeferQueryTest extends TestCase
                 $sequence->foreach(function($user) use ($usernames) {
                     $this->assertContains($user->username(), $usernames);
                 });
+            });
+    }
+
+    public function testSearchJsonField()
+    {
+        $this
+            ->forAll(
+                User::any(),
+                Set\Elements::of(35, 'foo', false),
+                Set\Elements::of(55, 'bar', true),
+            )
+            ->then(function($user, $value, $random) {
+                $this
+                    ->entityManager
+                    ->getConnection()
+                    ->executeUpdate('TRUNCATE TABLE user');
+
+                $user->multiType = $value;
+                $this->entityManager->persist($user);
+
+                $this->entityManager->flush();
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
+                );
+                $sequence = new DeferQuery(
+                    $qb(MultiType::of($value)),
+                );
+
+                $this->assertSame(1, $sequence->size());
+
+                $sequence = new DeferQuery(
+                    $qb(MultiType::of($random)),
+                );
+
+                $this->assertSame(0, $sequence->size());
+            });
+    }
+
+    public function testSearchInJsonField()
+    {
+        $this
+            ->forAll(
+                User::any(),
+            )
+            ->then(function($user) {
+                $this
+                    ->entityManager
+                    ->getConnection()
+                    ->executeUpdate('TRUNCATE TABLE user');
+
+                $user->multiType = 'foobar';
+                $this->entityManager->persist($user);
+
+                $this->entityManager->flush();
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
+                );
+                $sequence = new DeferQuery(
+                    $qb(MultiType::contains('oba')),
+                );
+
+                $this->assertSame(1, $sequence->size());
+
+                $sequence = new DeferQuery(
+                    $qb(MultiType::contains('abo')),
+                );
+
+                $this->assertSame(0, $sequence->size());
+            });
+    }
+
+    public function testSearchRelationJsonField()
+    {
+        $this
+            ->forAll(
+                User::any(User::list(1)),
+                Set\Elements::of(35, 'foo', false),
+                Set\Elements::of(55, 'bar', true),
+            )
+            ->then(function($user, $value, $random) {
+                $this
+                    ->entityManager
+                    ->getConnection()
+                    ->executeUpdate('TRUNCATE TABLE user');
+
+                $user->children->first()->multiType = $value;
+                $this->entityManager->persist($user);
+
+                $this->entityManager->flush();
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
+                );
+                $sequence = new DeferQuery(
+                    $qb(MultiType::child($value)),
+                );
+
+                $this->assertSame(1, $sequence->size());
+
+                $sequence = new DeferQuery(
+                    $qb(MultiType::child($random)),
+                );
+
+                $this->assertSame(0, $sequence->size());
             });
     }
 

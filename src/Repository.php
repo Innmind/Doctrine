@@ -100,7 +100,7 @@ final class Repository
 
         if ($repository instanceof EntityRepository) {
             return new Sequence\DeferQuery(
-                (new ToQueryBuilder($repository))($specification),
+                (new ToQueryBuilder($repository, $this->doctrine))($specification),
             );
         }
 

@@ -7,6 +7,7 @@ use Doctrine\ORM\{
     EntityManager,
 };
 use Doctrine\DBAL\Types\Type;
+use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mariadb\JsonValue;
 
 $params = [
     'host' => '127.0.0.1',
@@ -21,6 +22,7 @@ $config = Setup::createXMLMetadataConfiguration(
     [__DIR__.'/../example/'],
     true,
 );
+$config->addCustomStringFunction(JsonValue::FUNCTION_NAME, JsonValue::class);
 
 if (!Type::hasType('object_id')) {
     Type::addType('object_id', IdType::class);
