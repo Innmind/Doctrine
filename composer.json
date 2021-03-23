@@ -40,6 +40,10 @@
         "phpunit/phpunit": "~9.0",
         "vimeo/psalm": "~4.4",
         "innmind/black-box": "~4.10",
-        "innmind/coding-standard": "^1.1"
+        "innmind/coding-standard": "^1.1",
+        "scienta/doctrine-json-functions": "^4.3"
+    },
+    "suggest": {
+        "scienta/doctrine-json-functions": "To be able to search within a json field"
     }
 }

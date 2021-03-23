@@ -16,6 +16,7 @@ use Doctrine\ORM\{
     EntityRepository,
     QueryBuilder,
     Query\Expr,
+    Mapping\ClassMetadata,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -49,6 +50,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -56,7 +63,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} = ?1", (string) $qb);
@@ -86,6 +93,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -93,7 +106,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} <> ?1", (string) $qb);
@@ -123,6 +136,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -130,7 +149,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} < ?1", (string) $qb);
@@ -160,6 +179,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -167,7 +192,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} > ?1", (string) $qb);
@@ -197,6 +222,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -204,7 +235,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} <= ?1", (string) $qb);
@@ -234,6 +265,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -241,7 +278,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} >= ?1", (string) $qb);
@@ -271,6 +308,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -278,7 +321,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} IS NULL", (string) $qb);
@@ -308,6 +351,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -315,7 +364,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} IS NOT NULL", (string) $qb);
@@ -345,6 +394,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -352,7 +407,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} LIKE ?1", (string) $qb);
@@ -382,6 +437,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -389,7 +450,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} LIKE ?1", (string) $qb);
@@ -419,6 +480,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -426,7 +493,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} LIKE ?1", (string) $qb);
@@ -459,6 +526,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -466,7 +539,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$property} IN(?1)", (string) $qb);
@@ -500,6 +573,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -507,7 +586,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE NOT(entity.{$property} = ?1)", (string) $qb);
@@ -559,6 +638,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -566,7 +651,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND entity.{$rightProperty} <> ?2", (string) $qb);
@@ -619,6 +704,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -626,7 +717,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 OR entity.{$rightProperty} <> ?2", (string) $qb);
@@ -708,6 +799,12 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -715,7 +812,7 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND (entity.{$right1Property} <> ?2 OR entity.{$right2Property} <> ?3)", (string) $qb);
@@ -732,8 +829,9 @@ class ToQueryBuilderTest extends TestCase
                 $this->name(),
                 $this->name(),
                 Set\Unicode::strings(),
+                Set\Unicode::strings(),
             )
-            ->then(function($relation, $property, $value) {
+            ->then(function($relation, $property, $value, $targetEntity) {
                 $specification = $this->createMock(Comparator::class);
                 $specification
                     ->method('property')
@@ -748,6 +846,16 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getAssociationMapping')
+                    ->with($relation)
+                    ->willReturn(['targetEntity' => $targetEntity]);
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -759,7 +867,7 @@ class ToQueryBuilderTest extends TestCase
                     ->select('entity')
                     ->from('Entity', 'entity');
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$property} = ?1", (string) $qb);
@@ -776,8 +884,9 @@ class ToQueryBuilderTest extends TestCase
                 Set\Unicode::strings(),
                 $this->name(),
                 Set\Unicode::strings(),
+                Set\Unicode::strings(),
             )
-            ->then(function($relation, $leftProperty, $leftValue, $rightProperty, $rightValue) {
+            ->then(function($relation, $leftProperty, $leftValue, $rightProperty, $rightValue, $targetEntity) {
                 $left = $this->createMock(Comparator::class);
                 $left
                     ->method('property')
@@ -812,6 +921,16 @@ class ToQueryBuilderTest extends TestCase
                 $em
                     ->method('getExpressionBuilder')
                     ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getAssociationMapping')
+                    ->with($relation)
+                    ->willReturn(['targetEntity' => $targetEntity]);
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
                 $repository = $this->createMock(EntityRepository::class);
                 $repository
                     ->expects($this->once())
@@ -823,12 +942,55 @@ class ToQueryBuilderTest extends TestCase
                     ->select('entity')
                     ->from('Entity', 'entity');
 
-                $qb = (new ToQueryBuilder($repository))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$leftProperty} = ?1 AND {$relation}.{$rightProperty} <> ?2", (string) $qb);
                 $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
                 $this->assertSame($rightValue, $qb->getParameter(2)->getValue());
+            });
+    }
+
+    public function testMatchJsonField()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($property, $value) {
+                $specification = $this->createMock(Comparator::class);
+                $specification
+                    ->method('property')
+                    ->willReturn($property);
+                $specification
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specification
+                    ->method('value')
+                    ->willReturn($value);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'json']);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT WHERE json_value(entity.{$property}, '$') = ?1", (string) $qb);
+                $this->assertSame($value, $qb->getParameter(1)->getValue());
             });
     }
 

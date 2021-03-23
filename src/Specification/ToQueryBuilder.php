@@ -17,6 +17,7 @@ use Innmind\Specification\{
 };
 use Doctrine\ORM\{
     EntityRepository,
+    EntityManagerInterface,
     QueryBuilder,
 };
 use Doctrine\Common\Collections\{
@@ -30,6 +31,7 @@ use Doctrine\Common\Collections\{
 final class ToQueryBuilder
 {
     private EntityRepository $repository;
+    private EntityManagerInterface $manager;
     /** @psalm-allow-private-mutation */
     private int $count = 0;
     /**
@@ -38,10 +40,14 @@ final class ToQueryBuilder
      */
     private array $relations = [];
 
-    public function __construct(EntityRepository $repository)
-    {
+    public function __construct(
+        EntityRepository $repository,
+        EntityManagerInterface $manager
+    ) {
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->repository = $repository;
+        /** @psalm-suppress ImpurePropertyAssignment */
+        $this->manager = $manager;
     }
 
     public function __invoke(Specification $specification): QueryBuilder
@@ -113,12 +119,16 @@ final class ToQueryBuilder
     private function expression(Comparator $specification, QueryBuilder $qb)
     {
         $property = "entity.{$specification->property()}";
+        $relation = null;
+        $field = $specification->property();
 
         if (\strpos($specification->property(), '.') !== false) {
-            [$relation] = \explode('.', $specification->property());
+            [$relation, $field] = \explode('.', $specification->property());
             $this->relations[] = $relation;
             $property = $specification->property();
         }
+
+        $property = $this->decodeJson($property, $field, $relation);
 
         switch ($specification->sign()) {
             case Sign::equality():
@@ -208,5 +218,46 @@ final class ToQueryBuilder
         $qb->setParameter($this->count, $value);
 
         return "?{$this->count}";
+    }
+
+    /**
+     * @psalm-suppress ImpureMethodCall
+     */
+    private function decodeJson(
+        string $property,
+        string $field,
+        ?string $relation
+    ): string {
+        if ($this->type($field, $relation) === 'json') {
+            return "json_value($property, '$')";
+        }
+
+        return $property;
+    }
+
+    /**
+     * @psalm-suppress ImpureMethodCall
+     */
+    private function type(string $field, ?string $relation): string
+    {
+        if (\is_string($relation)) {
+            /** @var array{targetEntity:string} */
+            $association = $this
+                ->manager
+                ->getClassMetadata($this->repository->getClassName())
+                ->getAssociationMapping($relation);
+
+            /** @var string */
+            return $this
+                ->manager
+                ->getClassMetadata($association['targetEntity'])
+                ->getFieldMapping($field)['type'];
+        }
+
+        /** @var string */
+        return $this
+            ->manager
+            ->getClassMetadata($this->repository->getClassName())
+            ->getFieldMapping($field)['type'];
     }
 }

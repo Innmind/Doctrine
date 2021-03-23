@@ -14,8 +14,9 @@ final class User
     private Id $id;
     private string $username;
     private int $registerIndex;
+    public $multiType;
     private ?self $parent = null;
-    private Collection $children;
+    public Collection $children;
 
     public function __construct(
         Id $id,
