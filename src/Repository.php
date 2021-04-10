@@ -48,7 +48,6 @@ final class Repository
      */
     public function get(Id $id): object
     {
-        /** @var ?T */
         $entity = $this->doctrine->find($this->entityClass, $id);
 
         if (\is_null($entity)) {

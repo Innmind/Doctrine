@@ -60,10 +60,7 @@ final class Concrete implements Sequence
      */
     public static function defer(\Generator $elements): self
     {
-        /**
-         * @psalm-suppress ImpureMethodCall
-         * @var Immutable\Sequence<V>
-         */
+        /** @psalm-suppress ImpureMethodCall */
         $sequence = Immutable\Sequence::defer('mixed', $elements);
 
         return new self($sequence);
