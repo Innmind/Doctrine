@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Sequence\DeferQuery,
     Sequence,
     Specification\ToQueryBuilder,
+    Id,
 };
 use Doctrine\ORM\{
     QueryBuilder,
@@ -24,6 +25,8 @@ use Example\Innmind\Doctrine\{
     Username,
     Child,
     MultiType,
+    Address,
+    AddressSpec,
 };
 
 class DeferQueryTest extends TestCase
@@ -218,10 +221,7 @@ class DeferQueryTest extends TestCase
                 Set\Elements::of(55, 'bar', true),
             )
             ->then(function($user, $value, $random) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->multiType = $value;
                 $this->entityManager->persist($user);
@@ -252,10 +252,7 @@ class DeferQueryTest extends TestCase
                 User::any(),
             )
             ->then(function($user) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->multiType = 'foobar';
                 $this->entityManager->persist($user);
@@ -288,10 +285,7 @@ class DeferQueryTest extends TestCase
                 Set\Elements::of(55, 'bar', true),
             )
             ->then(function($user, $value, $random) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->children->first()->multiType = $value;
                 $this->entityManager->persist($user);
@@ -315,6 +309,83 @@ class DeferQueryTest extends TestCase
             });
     }
 
+    public function testChildSearch()
+    {
+        $seed = $this->seeder();
+        $this->reset();
+        $this->entityManager->persist($user1 = new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [
+                new Address(true, '42 somewhere Paris'),
+                new Address(false, '24 somewhere else London'),
+            ],
+        ));
+        $this->entityManager->persist($user2 = new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [
+                new Address(true, '42 somewhere London'),
+                new Address(false, '24 somewhere else Paris'),
+            ],
+        ));
+        $this->entityManager->persist(new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [],
+        ));
+        $this->entityManager->flush();
+
+        $qb = new ToQueryBuilder(
+            $this->entityManager->getRepository(Entity::class),
+            $this->entityManager,
+        );
+        $sequence = new DeferQuery($qb(AddressSpec::primary('Paris')));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user1, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(AddressSpec::primary('somewhere')));
+
+        $this->assertSame(2, $sequence->size());
+        $this->assertTrue($sequence->contains($user1));
+        $this->assertTrue($sequence->contains($user2));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('Paris')->or(AddressSpec::primary('42')),
+        ));
+
+        $this->assertSame(2, $sequence->size());
+        $this->assertTrue($sequence->contains($user1));
+        $this->assertTrue($sequence->contains($user2));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('Paris')->and(AddressSpec::secondary('London')),
+        ));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user1, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('London')->and(AddressSpec::secondary('Paris')),
+        ));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user2, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('nowhere')->or(AddressSpec::secondary('nowhere')),
+        ));
+
+        $this->assertSame(0, $sequence->size());
+    }
+
     public function properties(): iterable
     {
         foreach (Properties::list() as $property) {
@@ -322,12 +393,33 @@ class DeferQueryTest extends TestCase
         }
     }
 
-    private function load(Set $children = null): void
+    private function reset(): void
     {
         $this
             ->entityManager
             ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=0');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE user_addresses');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE address');
+        $this
+            ->entityManager
+            ->getConnection()
             ->executeUpdate('TRUNCATE TABLE user');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function load(Set $children = null): void
+    {
+        $this->reset();
 
         $this
             ->forAll(User::any($children))

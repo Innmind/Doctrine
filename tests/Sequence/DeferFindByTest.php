@@ -154,12 +154,33 @@ class DeferFindByTest extends TestCase
         }
     }
 
-    private function load(): void
+    private function reset(): void
     {
         $this
             ->entityManager
             ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=0');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE user_addresses');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE address');
+        $this
+            ->entityManager
+            ->getConnection()
             ->executeUpdate('TRUNCATE TABLE user');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function load(): void
+    {
+        $this->reset();
 
         $this
             ->forAll(User::any())
