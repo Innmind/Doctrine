@@ -218,10 +218,7 @@ class DeferQueryTest extends TestCase
                 Set\Elements::of(55, 'bar', true),
             )
             ->then(function($user, $value, $random) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->multiType = $value;
                 $this->entityManager->persist($user);
@@ -252,10 +249,7 @@ class DeferQueryTest extends TestCase
                 User::any(),
             )
             ->then(function($user) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->multiType = 'foobar';
                 $this->entityManager->persist($user);
@@ -288,10 +282,7 @@ class DeferQueryTest extends TestCase
                 Set\Elements::of(55, 'bar', true),
             )
             ->then(function($user, $value, $random) {
-                $this
-                    ->entityManager
-                    ->getConnection()
-                    ->executeUpdate('TRUNCATE TABLE user');
+                $this->reset();
 
                 $user->children->first()->multiType = $value;
                 $this->entityManager->persist($user);
@@ -322,12 +313,33 @@ class DeferQueryTest extends TestCase
         }
     }
 
-    private function load(Set $children = null): void
+    private function reset(): void
     {
         $this
             ->entityManager
             ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=0');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE user_addresses');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('TRUNCATE TABLE address');
+        $this
+            ->entityManager
+            ->getConnection()
             ->executeUpdate('TRUNCATE TABLE user');
+        $this
+            ->entityManager
+            ->getConnection()
+            ->executeUpdate('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function load(Set $children = null): void
+    {
+        $this->reset();
 
         $this
             ->forAll(User::any($children))

@@ -1,0 +1,9 @@
+<doctrine-mapping>
+    <entity name="Example\Innmind\Doctrine\Address" table="address">
+        <id name="id" type="object_id">
+            <generator strategy="NONE" />
+        </id>
+        <field name="main" type="boolean" />
+        <field name="address" type="string" />
+    </entity>
+</doctrine-mapping>
