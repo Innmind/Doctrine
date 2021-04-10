@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Sequence\DeferQuery,
     Sequence,
     Specification\ToQueryBuilder,
+    Id,
 };
 use Doctrine\ORM\{
     QueryBuilder,
@@ -24,6 +25,8 @@ use Example\Innmind\Doctrine\{
     Username,
     Child,
     MultiType,
+    Address,
+    AddressSpec,
 };
 
 class DeferQueryTest extends TestCase
@@ -304,6 +307,83 @@ class DeferQueryTest extends TestCase
 
                 $this->assertSame(0, $sequence->size());
             });
+    }
+
+    public function testChildSearch()
+    {
+        $seed = $this->seeder();
+        $this->reset();
+        $this->entityManager->persist($user1 = new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [
+                new Address(true, '42 somewhere Paris'),
+                new Address(false, '24 somewhere else London'),
+            ],
+        ));
+        $this->entityManager->persist($user2 = new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [
+                new Address(true, '42 somewhere London'),
+                new Address(false, '24 somewhere else Paris'),
+            ],
+        ));
+        $this->entityManager->persist(new Entity(
+            Id::new(),
+            $seed(Set\Elements::of('alice', 'bob', 'jane', 'john')),
+            $seed(Set\Integers::between(-100, 100)),
+            [],
+            [],
+        ));
+        $this->entityManager->flush();
+
+        $qb = new ToQueryBuilder(
+            $this->entityManager->getRepository(Entity::class),
+            $this->entityManager,
+        );
+        $sequence = new DeferQuery($qb(AddressSpec::primary('Paris')));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user1, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(AddressSpec::primary('somewhere')));
+
+        $this->assertSame(2, $sequence->size());
+        $this->assertTrue($sequence->contains($user1));
+        $this->assertTrue($sequence->contains($user2));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('Paris')->or(AddressSpec::primary('42')),
+        ));
+
+        $this->assertSame(2, $sequence->size());
+        $this->assertTrue($sequence->contains($user1));
+        $this->assertTrue($sequence->contains($user2));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('Paris')->and(AddressSpec::secondary('London')),
+        ));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user1, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('London')->and(AddressSpec::secondary('Paris')),
+        ));
+
+        $this->assertSame(1, $sequence->size());
+        $this->assertSame($user2, $sequence->find(static fn() => true));
+
+        $sequence = new DeferQuery($qb(
+            AddressSpec::primary('nowhere')->or(AddressSpec::secondary('nowhere')),
+        ));
+
+        $this->assertSame(0, $sequence->size());
     }
 
     public function properties(): iterable
