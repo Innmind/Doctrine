@@ -111,6 +111,7 @@ final class DeferFindBy implements Sequence
      */
     public function foreach(callable $function): void
     {
+        /** @psalm-suppress UnusedMethodCall */
         $this->unwrap()->foreach($function);
     }
 

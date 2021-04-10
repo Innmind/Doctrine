@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Doctrine\Specification;
 
-use Innmind\Doctrine\Specification\ToQueryBuilder;
+use Innmind\Doctrine\Specification\{
+    ToQueryBuilder,
+    Child,
+};
 use Innmind\Specification\{
     Comparator,
     Sign,
@@ -991,6 +994,250 @@ class ToQueryBuilderTest extends TestCase
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE json_value(entity.{$property}, '$') = ?1", (string) $qb);
                 $this->assertSame($value, $qb->getParameter(1)->getValue());
+            });
+    }
+
+    public function testChildQuery()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                $this->name(),
+                $this->name(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($relation, $join, $property, $value1, $value2, $targetEntity) {
+                $specificationJoin = $this->createMock(Comparator::class);
+                $specificationJoin
+                    ->method('property')
+                    ->willReturn("$relation.$join");
+                $specificationJoin
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationJoin
+                    ->method('value')
+                    ->willReturn($value1);
+                $specificationCondition = $this->createMock(Comparator::class);
+                $specificationCondition
+                    ->method('property')
+                    ->willReturn("$relation.$property");
+                $specificationCondition
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationCondition
+                    ->method('value')
+                    ->willReturn($value2);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getAssociationMapping')
+                    ->with($relation)
+                    ->willReturn(['targetEntity' => $targetEntity]);
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+                // needed for the left join to work
+                $expected
+                    ->select('entity')
+                    ->from('Entity', 'entity');
+
+                $qb = (new ToQueryBuilder($repository, $em))(new Child(
+                    $specificationJoin,
+                    $specificationCondition,
+                ));
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation}0 WITH {$relation}0.{$join} = ?2 WHERE {$relation}0.{$property} = ?1", (string) $qb);
+                $this->assertSame($value2, $qb->getParameter(1)->getValue());
+                $this->assertSame($value1, $qb->getParameter(2)->getValue());
+            });
+    }
+
+    public function testJoinOnceWhenJoiningSameChildTwice()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                $this->name(),
+                $this->name(),
+                $this->name(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($relation, $join, $property1, $property2, $value1, $value2, $value3, $targetEntity) {
+                $specificationJoin = $this->createMock(Comparator::class);
+                $specificationJoin
+                    ->method('property')
+                    ->willReturn("$relation.$join");
+                $specificationJoin
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationJoin
+                    ->method('value')
+                    ->willReturn($value1);
+                $specificationCondition1 = $this->createMock(Comparator::class);
+                $specificationCondition1
+                    ->method('property')
+                    ->willReturn("$relation.$property1");
+                $specificationCondition1
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationCondition1
+                    ->method('value')
+                    ->willReturn($value2);
+                $specificationCondition2 = $this->createMock(Comparator::class);
+                $specificationCondition2
+                    ->method('property')
+                    ->willReturn("$relation.$property2");
+                $specificationCondition2
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationCondition2
+                    ->method('value')
+                    ->willReturn($value3);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getAssociationMapping')
+                    ->with($relation)
+                    ->willReturn(['targetEntity' => $targetEntity]);
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+                // needed for the left join to work
+                $expected
+                    ->select('entity')
+                    ->from('Entity', 'entity');
+
+                $qb = (new ToQueryBuilder($repository, $em))(
+                    (new Child(
+                        $specificationJoin,
+                        $specificationCondition1,
+                    ))->and(new Child(
+                        $specificationJoin,
+                        $specificationCondition2,
+                    )),
+                );
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation}0 WITH {$relation}0.{$join} = ?3 WHERE {$relation}0.{$property1} = ?1 AND {$relation}0.{$property2} = ?2", (string) $qb);
+                $this->assertSame($value2, $qb->getParameter(1)->getValue());
+                $this->assertSame($value3, $qb->getParameter(2)->getValue());
+                $this->assertSame($value1, $qb->getParameter(3)->getValue());
+            });
+    }
+
+    public function testMultiJoinChildrenWithSameCondition()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                $this->name(),
+                $this->name(),
+                $this->name(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+                Set\Unicode::strings(),
+            )
+            ->then(function($relation, $join1, $join2, $property, $value1, $value2, $value3, $targetEntity) {
+                $specificationJoin1 = $this->createMock(Comparator::class);
+                $specificationJoin1
+                    ->method('property')
+                    ->willReturn("$relation.$join1");
+                $specificationJoin1
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationJoin1
+                    ->method('value')
+                    ->willReturn($value1);
+                $specificationJoin2 = $this->createMock(Comparator::class);
+                $specificationJoin2
+                    ->method('property')
+                    ->willReturn("$relation.$join2");
+                $specificationJoin2
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationJoin2
+                    ->method('value')
+                    ->willReturn($value2);
+                $specificationCondition = $this->createMock(Comparator::class);
+                $specificationCondition
+                    ->method('property')
+                    ->willReturn("$relation.$property");
+                $specificationCondition
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specificationCondition
+                    ->method('value')
+                    ->willReturn($value3);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getAssociationMapping')
+                    ->with($relation)
+                    ->willReturn(['targetEntity' => $targetEntity]);
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'string']);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+                // needed for the left join to work
+                $expected
+                    ->select('entity')
+                    ->from('Entity', 'entity');
+
+                $qb = (new ToQueryBuilder($repository, $em))(
+                    (new Child(
+                        $specificationJoin1,
+                        $specificationCondition,
+                    ))->and(new Child(
+                        $specificationJoin2,
+                        $specificationCondition,
+                    )),
+                );
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation}0 WITH {$relation}0.{$join1} = ?3 LEFT JOIN entity.{$relation} {$relation}1 WITH {$relation}1.{$join2} = ?4 WHERE {$relation}0.{$property} = ?1 AND {$relation}1.{$property} = ?2", (string) $qb);
+                $this->assertSame($value3, $qb->getParameter(1)->getValue());
+                $this->assertSame($value3, $qb->getParameter(2)->getValue());
+                $this->assertSame($value1, $qb->getParameter(3)->getValue());
+                $this->assertSame($value2, $qb->getParameter(4)->getValue());
             });
     }
 

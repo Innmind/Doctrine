@@ -17,17 +17,20 @@ final class User
     public $multiType;
     private ?self $parent = null;
     public Collection $children;
+    public Collection $addresses;
 
     public function __construct(
         Id $id,
         string $username,
         int $registerIndex = 0,
-        array $children = []
+        array $children = [],
+        array $addresses = []
     ) {
         $this->id = $id;
         $this->username = $username;
         $this->registerIndex = $registerIndex;
         $this->children = new ArrayCollection([]);
+        $this->addresses = new ArrayCollection($addresses);
 
         foreach ($children as $child) {
             $child->parent = $this;
