@@ -179,6 +179,10 @@ final class ToQueryBuilder
             $property = "$relationAlias.$field";
         }
 
+        if ($specification instanceof JsonArray) {
+            return $this->matchJson($qb, $property, $specification);
+        }
+
         $property = $this->decodeJson($property, $field, $relation);
 
         switch ($specification->sign()) {
@@ -341,5 +345,29 @@ final class ToQueryBuilder
         $this->children = ($this->children)($key, $alias);
 
         return $alias;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function matchJson(
+        QueryBuilder $qb,
+        string $property,
+        JsonArray $specification
+    ) {
+        // the sql json_contains function expects the value to be searched to be
+        // json encoded otherwise the value will never be found
+        $placeholder = $this->placeholder(
+            \json_encode($specification->value()),
+            $qb,
+        );
+
+        // we don't check the sign of the specification as for now it is always
+        // a contains sign allowing to apply the equality below, the 1 below
+        // means true
+        return $qb->expr()->eq(
+            "json_contains($property, $placeholder, '$')",
+            1,
+        );
     }
 }

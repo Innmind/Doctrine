@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Sequence\DeferQuery,
     Sequence,
     Specification\ToQueryBuilder,
+    Specification\JsonArray,
     Id,
 };
 use Doctrine\ORM\{
@@ -303,6 +304,42 @@ class DeferQueryTest extends TestCase
 
                 $sequence = new DeferQuery(
                     $qb(MultiType::child($random)),
+                );
+
+                $this->assertSame(0, $sequence->size());
+            });
+    }
+
+    public function testSearchJsonArray()
+    {
+        $this
+            ->forAll(
+                User::any(),
+                Set\Sequence::of(
+                    Set\Strings::madeOf(Set\Chars::alphanumerical()),
+                    Set\Integers::between(1, 5),
+                ),
+                Set\Strings::madeOf(Set\Chars::alphanumerical()),
+            )
+            ->then(function($user, $value, $random) {
+                $this->reset();
+
+                $user->multiType = $value;
+                $this->entityManager->persist($user);
+
+                $this->entityManager->flush();
+                $qb = new ToQueryBuilder(
+                    $this->entityManager->getRepository(Entity::class),
+                    $this->entityManager,
+                );
+                $sequence = new DeferQuery(
+                    $qb(JsonArray::contains('multiType', $value[0])),
+                );
+
+                $this->assertSame(1, $sequence->size());
+
+                $sequence = new DeferQuery(
+                    $qb(JsonArray::contains('multiType', $random)),
                 );
 
                 $this->assertSame(0, $sequence->size());
