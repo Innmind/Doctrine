@@ -348,6 +348,8 @@ final class ToQueryBuilder
     }
 
     /**
+     * @psalm-suppress ImpureMethodCall
+     *
      * @return mixed
      */
     private function matchJson(

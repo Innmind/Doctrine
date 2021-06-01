@@ -97,12 +97,14 @@ final class Repository
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if ($repository instanceof EntityRepository) {
             return new Sequence\DeferQuery(
                 (new ToQueryBuilder($repository, $this->doctrine))($specification),
             );
         }
 
+        /** @psalm-suppress MixedArgument */
         return new Sequence\DeferFindBy(
             $repository,
             $specification,
@@ -116,6 +118,7 @@ final class Repository
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if ($repository instanceof EntityRepository) {
             /** @var Sequence<T> */
             return new Sequence\DeferQuery(
@@ -123,7 +126,11 @@ final class Repository
             );
         }
 
-        /** @var Sequence<T> */
+        /**
+         * @psalm-suppress MixedArgument
+         * @psalm-suppress MixedMethodCall
+         * @var Sequence<T>
+         */
         return Sequence\Concrete::of(
             ...$repository->findAll(),
         );
