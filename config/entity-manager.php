@@ -8,6 +8,7 @@ use Doctrine\ORM\{
 };
 use Doctrine\DBAL\Types\Type;
 use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mariadb\JsonValue;
+use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonContains;
 
 $params = [
     'host' => '127.0.0.1',
@@ -23,6 +24,7 @@ $config = Setup::createXMLMetadataConfiguration(
     true,
 );
 $config->addCustomStringFunction(JsonValue::FUNCTION_NAME, JsonValue::class);
+$config->addCustomStringFunction(JsonContains::FUNCTION_NAME, JsonContains::class);
 
 if (!Type::hasType('object_id')) {
     Type::addType('object_id', IdType::class);

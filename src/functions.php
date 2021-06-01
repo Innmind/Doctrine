@@ -12,6 +12,7 @@ namespace Innmind\Doctrine;
  */
 function unwrap(Sequence $sequence): array
 {
+    /** @psalm-suppress MissingClosureParamType */
     return $sequence->reduce(
         [],
         static function(array $elements, $element): array {

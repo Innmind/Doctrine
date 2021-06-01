@@ -6,6 +6,7 @@ namespace Tests\Innmind\Doctrine\Specification;
 use Innmind\Doctrine\Specification\{
     ToQueryBuilder,
     Child,
+    JsonArray,
 };
 use Innmind\Specification\{
     Comparator,
@@ -994,6 +995,40 @@ class ToQueryBuilderTest extends TestCase
                 $this->assertSame($expected, $qb);
                 $this->assertSame("SELECT WHERE json_value(entity.{$property}, '$') = ?1", (string) $qb);
                 $this->assertSame($value, $qb->getParameter(1)->getValue());
+            });
+    }
+
+    public function testJsonArrayContains()
+    {
+        $this
+            ->forAll(
+                $this->name(),
+                Set\Strings::madeOf(Set\Chars::alphanumerical()),
+            )
+            ->then(function($property, $value) {
+                $specification = JsonArray::contains($property, $value);
+                $em = $this->createMock(EntityManagerInterface::class);
+                $em
+                    ->method('getExpressionBuilder')
+                    ->willReturn(new Expr);
+                $em
+                    ->method('getClassMetadata')
+                    ->willReturn($classMetadata = $this->createMock(ClassMetadata::class));
+                $classMetadata
+                    ->method('getFieldMapping')
+                    ->willReturn(['type' => 'json']);
+                $repository = $this->createMock(EntityRepository::class);
+                $repository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($expected = new QueryBuilder($em));
+
+                $qb = (new ToQueryBuilder($repository, $em))($specification);
+
+                $this->assertSame($expected, $qb);
+                $this->assertSame("SELECT WHERE json_contains(entity.{$property}, ?1, '$') = 1", (string) $qb);
+                $this->assertSame($value, \json_decode($qb->getParameter(1)->getValue()));
             });
     }
 
