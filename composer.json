@@ -42,7 +42,7 @@
         "innmind/black-box": "~4.10",
         "innmind/coding-standard": "^1.1",
         "scienta/doctrine-json-functions": "^4.3",
-        "symfony/cache": "^6.0"
+        "symfony/cache": "^5.0"
     },
     "suggest": {
         "scienta/doctrine-json-functions": "To be able to search within a json field"
