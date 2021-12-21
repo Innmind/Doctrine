@@ -41,7 +41,8 @@
         "vimeo/psalm": "~4.4",
         "innmind/black-box": "~4.10",
         "innmind/coding-standard": "^1.1",
-        "scienta/doctrine-json-functions": "^4.3"
+        "scienta/doctrine-json-functions": "^4.3",
+        "doctrine/cache": "^2.1"
     },
     "suggest": {
         "scienta/doctrine-json-functions": "To be able to search within a json field"
