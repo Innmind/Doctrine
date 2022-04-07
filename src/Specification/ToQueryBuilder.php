@@ -26,6 +26,10 @@ use Doctrine\Common\Collections\{
     Criteria,
     Expr\Expression,
 };
+use Doctrine\DBAL\Types\{
+    Type,
+    JsonType,
+};
 
 /**
  * @psalm-immutable
@@ -175,6 +179,7 @@ final class ToQueryBuilder
 
         if (\strpos($specification->property(), '.') !== false) {
             [$relation, $field] = \explode('.', $specification->property());
+            /** @psalm-suppress ImpureFunctionCall */
             $relationAlias = $alias($specification->property());
             $property = "$relationAlias.$field";
         }
@@ -296,7 +301,7 @@ final class ToQueryBuilder
         string $field,
         ?string $relation
     ): string {
-        if ($this->type($field, $relation) === 'json') {
+        if ($this->type($field, $relation) instanceof JsonType) {
             return "json_value($property, '$')";
         }
 
@@ -305,8 +310,9 @@ final class ToQueryBuilder
 
     /**
      * @psalm-suppress ImpureMethodCall
+     * @psalm-suppress UndefinedDocblockClass
      */
-    private function type(string $field, ?string $relation): string
+    private function type(string $field, ?string $relation): Type
     {
         if (\is_string($relation)) {
             /** @var array{targetEntity:string} */
@@ -315,18 +321,20 @@ final class ToQueryBuilder
                 ->getClassMetadata($this->repository->getClassName())
                 ->getAssociationMapping($relation);
 
-            /** @var string */
-            return $this
+            $type = $this
                 ->manager
                 ->getClassMetadata($association['targetEntity'])
                 ->getFieldMapping($field)['type'];
+
+            return Type::getType($type);
         }
 
-        /** @var string */
-        return $this
+        $type = $this
             ->manager
             ->getClassMetadata($this->repository->getClassName())
             ->getFieldMapping($field)['type'];
+
+        return Type::getType($type);
     }
 
     /**

@@ -130,7 +130,7 @@ $manager
     });
 ```
 
-This example is the equivalent of `SELECT * FROM user WHERE username = 'alice' OT username = 'jane' ORDER BY username OFFSET 20 LIMIT 10`.
+This example is the equivalent of `SELECT * FROM user WHERE username = 'alice' OR username = 'jane' ORDER BY username OFFSET 20 LIMIT 10`.
 
 **Note**: This chain of method calls result once again in a single database call.
 
