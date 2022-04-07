@@ -230,7 +230,10 @@ final class DeferFindBy implements Sequence
      */
     private function unwrap(): Sequence
     {
-        /** @var Sequence<T> */
+        /**
+         * @psalm-suppress ImpureFunctionCall
+         * @var Sequence<T>
+         */
         return $this->fetched ??= Concrete::defer((static function(
             ObjectRepository $repository,
             Specification $specification,

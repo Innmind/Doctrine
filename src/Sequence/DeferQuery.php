@@ -222,7 +222,10 @@ final class DeferQuery implements Sequence
      */
     private function unwrap(): Sequence
     {
-        /** @var Sequence<T> */
+        /**
+         * @psalm-suppress ImpureFunctionCall
+         * @var Sequence<T>
+         */
         return $this->fetched ??= Concrete::defer((static function(
             QueryBuilder $queryBuilder,
             array $sort,

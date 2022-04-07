@@ -179,6 +179,7 @@ final class ToQueryBuilder
 
         if (\strpos($specification->property(), '.') !== false) {
             [$relation, $field] = \explode('.', $specification->property());
+            /** @psalm-suppress ImpureFunctionCall */
             $relationAlias = $alias($specification->property());
             $property = "$relationAlias.$field";
         }
