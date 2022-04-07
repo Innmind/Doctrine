@@ -319,7 +319,6 @@ final class ToQueryBuilder
                 ->getClassMetadata($this->repository->getClassName())
                 ->getAssociationMapping($relation);
 
-            /** @var string */
             $type = $this
                 ->manager
                 ->getClassMetadata($association['targetEntity'])
@@ -328,7 +327,6 @@ final class ToQueryBuilder
             return Type::getType($type);
         }
 
-        /** @var string */
         $type = $this
             ->manager
             ->getClassMetadata($this->repository->getClassName())
