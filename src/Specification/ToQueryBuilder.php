@@ -310,6 +310,7 @@ final class ToQueryBuilder
 
     /**
      * @psalm-suppress ImpureMethodCall
+     * @psalm-suppress UndefinedDocblockClass
      */
     private function type(string $field, ?string $relation): Type
     {
