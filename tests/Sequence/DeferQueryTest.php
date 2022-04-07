@@ -316,10 +316,10 @@ class DeferQueryTest extends TestCase
             ->forAll(
                 User::any(),
                 Set\Sequence::of(
-                    Set\Strings::madeOf(Set\Chars::alphanumerical()),
+                    Set\Strings::madeOf(Set\Chars::alphanumerical())->atLeast(1),
                     Set\Integers::between(1, 5),
                 ),
-                Set\Strings::madeOf(Set\Chars::alphanumerical()),
+                Set\Strings::madeOf(Set\Chars::alphanumerical())->atLeast(1),
             )
             ->then(function($user, $value, $random) {
                 $this->reset();
