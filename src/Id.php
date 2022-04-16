@@ -9,11 +9,11 @@ use Ramsey\Uuid\Uuid;
  * @template T of object
  * @psalm-immutable
  */
-class Id
+final class Id
 {
     private string $id;
 
-    final public function __construct(string $id)
+    public function __construct(string $id)
     {
         if (!Uuid::isValid($id)) {
             throw new Exception\DomainException("'$id' is not a valid uuid");
@@ -53,7 +53,7 @@ class Id
         return $this->toString() === $other->toString();
     }
 
-    final public function toString(): string
+    public function toString(): string
     {
         return $this->id;
     }

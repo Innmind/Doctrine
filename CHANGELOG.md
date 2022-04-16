@@ -9,6 +9,7 @@
 
 ### Changed
 
+- `Innmind\Doctrine\Id` is now `final`
 - `Innmind\Doctrine\Id::new` now expect the `class-string` of the entity it is for
 - `Innmind\Doctrine\Manager` constructor is now private, use `::of` named constructor instead
 - `Innmind\Doctrine\Repository::get` now returns a `Innmind\Immutable\Maybe` instead of throwing an exception
