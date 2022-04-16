@@ -51,6 +51,7 @@ final class Matching
     }
 
     /**
+     * @internal
      * @psalm-pure
      * @template A of object
      *
@@ -67,6 +68,7 @@ final class Matching
     }
 
     /**
+     * @internal
      * @psalm-pure
      * @template A of object
      *
