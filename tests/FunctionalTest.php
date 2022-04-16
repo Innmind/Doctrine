@@ -7,6 +7,7 @@ use Innmind\Doctrine\{
     Manager,
     Sort,
 };
+use Innmind\Immutable\Either;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -32,7 +33,7 @@ class FunctionalTest extends TestCase
             ->forAll(FUser::any())
             ->take(10)
             ->then(static function($user) use ($manager, $repository) {
-                $manager->mutate(static fn() => $repository->add($user));
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
             });
 
         $this->assertCount(
@@ -87,7 +88,7 @@ class FunctionalTest extends TestCase
             ->forAll(FUser::any())
             ->take(100)
             ->then(static function($user) use ($manager, $repository) {
-                $manager->mutate(static fn() => $repository->add($user));
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
             });
 
         $users = $repository
@@ -141,7 +142,7 @@ class FunctionalTest extends TestCase
             ->forAll(FUser::any())
             ->take(100)
             ->then(static function($user) use ($manager, $repository) {
-                $manager->mutate(static fn() => $repository->add($user));
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
             });
 
         $allAlices = $repository
@@ -196,7 +197,7 @@ class FunctionalTest extends TestCase
             ->forAll(FUser::any())
             ->take(100)
             ->then(static function($user) use ($manager, $repository) {
-                $manager->mutate(static fn() => $repository->add($user));
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
             });
 
         $users = $repository

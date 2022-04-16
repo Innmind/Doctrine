@@ -9,6 +9,7 @@
 
 ### Changed
 
+- The callable passed to `Innmind\Doctrine\Manager::mutate` and `Innmind\Doctrine\Manager::transaction` must return an instance of `Innmind\Immutable\Either`
 - `Innmind\Doctrine\Id` is now `final`
 - `Innmind\Doctrine\Id::new` now expect the `class-string` of the entity it is for
 - `Innmind\Doctrine\Manager` constructor is now private, use `::of` named constructor instead
