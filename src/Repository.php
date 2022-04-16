@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine;
 
-use Innmind\Doctrine\{
-    Exception\EntityNotFound,
-    Exception\MutationOutsideOfContext,
-};
+use Innmind\Doctrine\Exception\MutationOutsideOfContext;
 use Innmind\Specification\Specification;
 use Innmind\Immutable\Maybe;
 use Doctrine\ORM\{
@@ -42,19 +39,11 @@ final class Repository
     /**
      * @param Id<T> $id
      *
-     * @throws EntityNotFound
-     *
-     * @return T
+     * @return Maybe<T>
      */
-    public function get(Id $id): object
+    public function get(Id $id): Maybe
     {
-        $entity = $this->doctrine->find($this->entityClass, $id);
-
-        if (\is_null($entity)) {
-            throw new EntityNotFound($id->toString());
-        }
-
-        return $entity;
+        return Maybe::of($this->doctrine->find($this->entityClass, $id));
     }
 
     /**
@@ -62,7 +51,10 @@ final class Repository
      */
     public function contains(Id $id): bool
     {
-        return !\is_null($this->doctrine->find($this->entityClass, $id));
+        return $this->get($id)->match(
+            static fn() => true,
+            static fn() => false,
+        );
     }
 
     /**

@@ -9,6 +9,7 @@
 
 ### Changed
 
+- `Innmind\Doctrine\Repository::get` now returns a `Innmind\Immutable\Maybe` instead of throwing an exception
 - Update `innmind/immutable` to version `~4.0`
 - `Innmind\Doctrine\Repository::matching()` now returns an instance of `Innmind\Doctrine\Matching`
 - `Innmind\Doctrine\Repository::all()` now returns an instance of `Innmind\Doctrine\Matching`

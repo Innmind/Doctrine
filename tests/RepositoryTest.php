@@ -6,7 +6,6 @@ namespace Tests\Innmind\Doctrine;
 use Innmind\Doctrine\{
     Repository,
     Matching,
-    Exception\EntityNotFound,
     Exception\MutationOutsideOfContext,
 };
 use Doctrine\ORM\{
@@ -34,7 +33,7 @@ class RepositoryTest extends TestCase
 {
     use BlackBox;
 
-    public function testThrowWhenGettingUnknownValue()
+    public function testReturnNothingWhenGettingUnknownValue()
     {
         $this
             ->forAll(
@@ -52,9 +51,10 @@ class RepositoryTest extends TestCase
                     ->with($entityClass, $id)
                     ->willReturn(null);
 
-                $this->expectException(EntityNotFound::class);
-
-                $repository->get($id);
+                $this->assertNull($repository->get($id)->match(
+                    static fn($value) => $value,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -77,7 +77,10 @@ class RepositoryTest extends TestCase
                     ->with($entityClass, $id)
                     ->willReturn($entity);
 
-                $this->assertSame($entity, $repository->get($id));
+                $this->assertSame($entity, $repository->get($id)->match(
+                    static fn($value) => $value,
+                    static fn() => null,
+                ));
             });
     }
 
