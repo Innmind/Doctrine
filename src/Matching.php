@@ -3,8 +3,12 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine;
 
-use Innmind\Doctrine\Specification\ToQueryBuilder;
+use Innmind\Doctrine\Specification\{
+    ToQueryBuilder,
+    ToArray,
+};
 use Innmind\Specification\Specification;
+use Innmind\Immutable\Sequence;
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
@@ -130,59 +134,121 @@ final class Matching
      */
     public function fetch(): Sequence
     {
-        if (\is_null($this->specification)) {
-            return $this->fetchAll();
-        }
-
         if ($this->repository instanceof EntityRepository) {
-            /** @var Sequence<T> */
-            $sequence = new Sequence\DeferQuery(
-                (new ToQueryBuilder($this->repository, $this->manager))($this->specification),
-            );
-        } else {
-            /** @var Sequence<T> */
-            $sequence = new Sequence\DeferFindBy(
-                $this->repository,
-                $this->specification,
-            );
+            /** @psalm-suppress MixedArgumentTypeCoercion */
+            return $this->fetchQueryBuilder($this->repository);
         }
 
-        foreach ($this->sort as $property => $direction) {
-            /** @psalm-suppress ArgumentTypeCoercion Sort cases are asc and desc */
-            $sequence = $sequence->sort($property, $direction->name);
-        }
-
-        $sequence = $sequence->drop($this->toDrop);
-
-        if (\is_int($this->toTake)) {
-            $sequence = $sequence->take($this->toTake);
-        }
-
-        return $sequence;
+        return $this->directFetch($this->repository);
     }
 
     /**
+     * @param EntityRepository<T> $repository
+     *
      * @return Sequence<T>
      */
-    private function fetchAll(): Sequence
+    private function fetchQueryBuilder(EntityRepository $repository): Sequence
     {
-        if ($this->repository instanceof EntityRepository) {
+        /** @psalm-suppress ImpureFunctionCall */
+        return Sequence::defer((static function(
+            EntityRepository $repository,
+            EntityManagerInterface $manager,
+            ?Specification $specification,
+            array $sort,
+            int $toDrop,
+            ?int $toTake,
+        ) {
+            if (\is_null($specification)) {
+                $queryBuilder = $repository->createQueryBuilder('entity');
+            } else {
+                $queryBuilder = (new ToQueryBuilder($repository, $manager))($specification);
+            }
+
+            /**
+             * @var string $property
+             * @var Sort $direction
+             */
+            foreach ($sort as $property => $direction) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion Sort cases are asc and desc
+                 * @psalm-suppress ImpureMethodCall
+                 */
+                $queryBuilder->addOrderBy($property, $direction->name);
+            }
+
+            if ($toDrop !== 0) {
+                /** @psalm-suppress ImpureMethodCall */
+                $queryBuilder->setFirstResult($toDrop);
+            }
+
+            if (\is_int($toTake)) {
+                /** @psalm-suppress ImpureMethodCall */
+                $queryBuilder->setMaxResults($toTake);
+            }
+
             /**
              * @psalm-suppress ImpureMethodCall
-             * @var Sequence<T>
+             * @var list<T>
              */
-            return new Sequence\DeferQuery(
-                $this->repository->createQueryBuilder('entity'),
-            );
-        }
+            $entities = $queryBuilder->getQuery()->getResult();
 
-        /**
-         * @psalm-suppress MixedArgument
-         * @psalm-suppress ImpureMethodCall
-         * @var Sequence<T>
-         */
-        return Sequence\Concrete::of(
-            ...$this->repository->findAll(),
-        );
+            foreach ($entities as $entity) {
+                yield $entity;
+            }
+        })(
+            $repository,
+            $this->manager,
+            $this->specification,
+            $this->sort,
+            $this->toDrop,
+            $this->toTake,
+        ));
+    }
+
+    /**
+     * @param ObjectRepository<T> $repository
+     *
+     * @return Sequence<T>
+     */
+    private function directFetch(ObjectRepository $repository): Sequence
+    {
+        /** @psalm-suppress ImpureFunctionCall */
+        return Sequence::defer((static function(
+            ObjectRepository $repository,
+            ?Specification $specification,
+            array $sort,
+            int $toDrop,
+            ?int $toTake,
+        ) {
+            if (\is_null($specification)) {
+                $criteria = [];
+            } else {
+                $criteria = (new ToArray)($specification);
+            }
+
+            /**
+             * @psalm-suppress ArgumentTypeCoercion
+             * @var iterable<T>
+             */
+            $entities = $repository->findBy(
+                $criteria,
+                \array_map(
+                    static fn(Sort $sort) => $sort->name,
+                    $sort,
+                ),
+                $toTake,
+                $toDrop === 0 ? null : $toDrop,
+            );
+
+            foreach ($entities as $entity) {
+                yield $entity;
+            }
+        })(
+            $repository,
+            $this->specification,
+            $this->sort,
+            $this->toDrop,
+            $this->toTake,
+        ));
     }
 }

@@ -4,5 +4,4 @@ return Innmind\CodingStandard\CodingStandard::config([
     'tests',
     'src',
     'fixtures',
-    'properties',
 ]);

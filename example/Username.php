@@ -32,6 +32,11 @@ final class Username implements Comparator
         return new self($usernames, Sign::in);
     }
 
+    public static function startsWith(string $username): self
+    {
+        return new self($username, Sign::startsWith);
+    }
+
     public function property(): string
     {
         return 'username';

@@ -60,7 +60,7 @@ final class ToQueryBuilder
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->manager = $manager;
         /** @var Map<array{0: string, 1: string, 2: mixed}, string> */
-        $this->children = Map::of('array', 'mixed');
+        $this->children = Map::of();
     }
 
     public function __invoke(Specification $specification): QueryBuilder
@@ -73,7 +73,7 @@ final class ToQueryBuilder
          * @psalm-suppress ImpureMethodCall
          * @var Map<array{0: string, 1: string, 2: mixed}, string>
          */
-        $this->children = Map::of('array', 'string');
+        $this->children = Map::of();
 
         /** @psalm-suppress ImpureMethodCall */
         $qb = $this->repository->createQueryBuilder('entity');
@@ -97,7 +97,7 @@ final class ToQueryBuilder
         }
 
         /** @psalm-suppress ImpureMethodCall */
-        $this->children->foreach(function(array $key, string $alias) use ($qb): void {
+        $_ = $this->children->foreach(function(array $key, string $alias) use ($qb): void {
             /** @var mixed $value */
             [$relation, $field, $value] = $key;
 
@@ -315,14 +315,18 @@ final class ToQueryBuilder
         [$relation, $field] = \explode('.', $specification->property());
         $key = [$relation, $field, $specification->value()];
 
-        if ($this->children->contains($key)) {
-            return $this->children->get($key);
-        }
+        return $this
+            ->children
+            ->get($key)
+            ->match(
+                static fn($child) => $child,
+                function() use ($relation, $key): string {
+                    $alias = "$relation{$this->children->size()}";
+                    $this->children = ($this->children)($key, $alias);
 
-        $alias = "$relation{$this->children->size()}";
-        $this->children = ($this->children)($key, $alias);
-
-        return $alias;
+                    return $alias;
+                },
+            );
     }
 
     /**

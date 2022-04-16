@@ -5,7 +5,6 @@ namespace Tests\Innmind\Doctrine;
 
 use Innmind\Doctrine\{
     Repository,
-    Sequence,
     Matching,
     Exception\EntityNotFound,
     Exception\MutationOutsideOfContext,
@@ -14,6 +13,7 @@ use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
     QueryBuilder,
+    AbstractQuery,
 };
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
@@ -182,7 +182,8 @@ class RepositoryTest extends TestCase
                     ->willReturn($innerRepository = $this->createMock(ObjectRepository::class));
                 $innerRepository
                     ->expects($this->once())
-                    ->method('findAll')
+                    ->method('findBy')
+                    ->with([])
                     ->willReturn($entities);
 
                 $this->assertSame(
@@ -222,11 +223,19 @@ class RepositoryTest extends TestCase
                     ->expects($this->once())
                     ->method('createQueryBuilder')
                     ->with('entity')
-                    ->willReturn($this->createMock(QueryBuilder::class));
+                    ->willReturn($qb = $this->createMock(QueryBuilder::class));
+                $qb
+                    ->expects($this->once())
+                    ->method('getQuery')
+                    ->willReturn($query = $this->createMock(AbstractQuery::class));
+                $query
+                    ->expects($this->once())
+                    ->method('getResult')
+                    ->willReturn([]);
 
-                $this->assertInstanceOf(
-                    Sequence\DeferQuery::class,
-                    $repository->all()->fetch(),
+                $this->assertSame(
+                    [],
+                    $repository->all()->fetch()->toList(),
                 );
             });
     }

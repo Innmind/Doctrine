@@ -4,11 +4,11 @@ declare(strict_types = 1);
 namespace Innmind\Doctrine;
 
 use Innmind\Doctrine\{
-    Specification\ToQueryBuilder,
     Exception\EntityNotFound,
     Exception\MutationOutsideOfContext,
 };
 use Innmind\Specification\Specification;
+use Innmind\Immutable\Maybe;
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
