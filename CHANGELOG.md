@@ -9,6 +9,7 @@
 
 ### Changed
 
+- `Innmind\Doctrine\Manager` constructor is now private, use `::of` named constructor instead
 - `Innmind\Doctrine\Repository::get` now returns a `Innmind\Immutable\Maybe` instead of throwing an exception
 - Update `innmind/immutable` to version `~4.0`
 - `Innmind\Doctrine\Repository::matching()` now returns an instance of `Innmind\Doctrine\Matching`

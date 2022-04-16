@@ -11,9 +11,14 @@ final class Manager
     private EntityManagerInterface $entityManager;
     private bool $mutating = false;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    private function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+    }
+
+    public static function of(EntityManagerInterface $entityManager): self
+    {
+        return new self($entityManager);
     }
 
     /**

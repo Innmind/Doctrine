@@ -26,7 +26,7 @@ class FunctionalTest extends TestCase
     {
         $entityManager = require __DIR__.'/../config/entity-manager.php';
         $this->reset($entityManager);
-        $manager = new Manager($entityManager);
+        $manager = Manager::of($entityManager);
         $repository = $manager->repository(User::class);
         $this
             ->forAll(FUser::any())
@@ -81,7 +81,7 @@ class FunctionalTest extends TestCase
     {
         $entityManager = require __DIR__.'/../config/entity-manager.php';
         $this->reset($entityManager);
-        $manager = new Manager($entityManager);
+        $manager = Manager::of($entityManager);
         $repository = $manager->repository(User::class);
         $this
             ->forAll(FUser::any())
@@ -135,7 +135,7 @@ class FunctionalTest extends TestCase
     {
         $entityManager = require __DIR__.'/../config/entity-manager.php';
         $this->reset($entityManager);
-        $manager = new Manager($entityManager);
+        $manager = Manager::of($entityManager);
         $repository = $manager->repository(User::class);
         $this
             ->forAll(FUser::any())
@@ -190,7 +190,7 @@ class FunctionalTest extends TestCase
     {
         $entityManager = require __DIR__.'/../config/entity-manager.php';
         $this->reset($entityManager);
-        $manager = new Manager($entityManager);
+        $manager = Manager::of($entityManager);
         $repository = $manager->repository(User::class);
         $this
             ->forAll(FUser::any())
