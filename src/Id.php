@@ -32,8 +32,16 @@ class Id
         return $this->id;
     }
 
-    public static function new(): self
+    /**
+     * @template A
+     *
+     * @param class-string<A> $class
+     *
+     * @return self<A>
+     */
+    public static function new(string $class): self
     {
+        /** @var self<A> */
         return new self(Uuid::uuid4()->toString());
     }
 

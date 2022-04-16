@@ -75,12 +75,12 @@ class IdTest extends TestCase
     {
         $this->assertInstanceOf(
             Id::class,
-            Id::new(),
+            Id::new('stdClass'),
         );
     }
 
     public function testNewNeverReturnsTheSameValue()
     {
-        $this->assertFalse(Id::new()->equals(Id::new()));
+        $this->assertFalse(Id::new('stdClass')->equals(Id::new('stdClass')));
     }
 }
