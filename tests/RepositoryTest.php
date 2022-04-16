@@ -5,14 +5,14 @@ namespace Tests\Innmind\Doctrine;
 
 use Innmind\Doctrine\{
     Repository,
-    Sequence,
-    Exception\EntityNotFound,
+    Matching,
     Exception\MutationOutsideOfContext,
 };
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
     QueryBuilder,
+    AbstractQuery,
 };
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +33,7 @@ class RepositoryTest extends TestCase
 {
     use BlackBox;
 
-    public function testThrowWhenGettingUnknownValue()
+    public function testReturnNothingWhenGettingUnknownValue()
     {
         $this
             ->forAll(
@@ -51,9 +51,10 @@ class RepositoryTest extends TestCase
                     ->with($entityClass, $id)
                     ->willReturn(null);
 
-                $this->expectException(EntityNotFound::class);
-
-                $repository->get($id);
+                $this->assertNull($repository->get($id)->match(
+                    static fn($value) => $value,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -76,7 +77,10 @@ class RepositoryTest extends TestCase
                     ->with($entityClass, $id)
                     ->willReturn($entity);
 
-                $this->assertSame($entity, $repository->get($id));
+                $this->assertSame($entity, $repository->get($id)->match(
+                    static fn($value) => $value,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -181,13 +185,15 @@ class RepositoryTest extends TestCase
                     ->willReturn($innerRepository = $this->createMock(ObjectRepository::class));
                 $innerRepository
                     ->expects($this->once())
-                    ->method('findAll')
+                    ->method('findBy')
+                    ->with([])
                     ->willReturn($entities);
 
                 $this->assertSame(
                     $entities,
                     $repository
                         ->all()
+                        ->fetch()
                         ->reduce(
                             [],
                             static function($entities, $entity) {
@@ -220,11 +226,19 @@ class RepositoryTest extends TestCase
                     ->expects($this->once())
                     ->method('createQueryBuilder')
                     ->with('entity')
-                    ->willReturn($this->createMock(QueryBuilder::class));
+                    ->willReturn($qb = $this->createMock(QueryBuilder::class));
+                $qb
+                    ->expects($this->once())
+                    ->method('getQuery')
+                    ->willReturn($query = $this->createMock(AbstractQuery::class));
+                $query
+                    ->expects($this->once())
+                    ->method('getResult')
+                    ->willReturn([]);
 
-                $this->assertInstanceOf(
-                    Sequence\DeferQuery::class,
-                    $repository->all(),
+                $this->assertSame(
+                    [],
+                    $repository->all()->fetch()->toList(),
                 );
             });
     }
@@ -247,7 +261,7 @@ class RepositoryTest extends TestCase
                     ->willReturn($this->createMock(ObjectRepository::class));
 
                 $this->assertInstanceOf(
-                    Sequence\DeferFindBy::class,
+                    Matching::class,
                     $repository->matching(Username::of($username)),
                 );
             });
@@ -268,7 +282,7 @@ class RepositoryTest extends TestCase
                 );
 
                 $this->assertInstanceOf(
-                    Sequence\DeferQuery::class,
+                    Matching::class,
                     $repository->matching(Username::of($username)),
                 );
             });
@@ -279,7 +293,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Strings::any(),
-                User::any()
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(
@@ -302,7 +316,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Strings::any(),
-                User::any()
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(

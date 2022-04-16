@@ -15,24 +15,21 @@
         "issues": "http://github.com/innmind/doctrine/issues"
     },
     "require": {
-        "php": "~7.4|~8.0",
-        "innmind/immutable": "^3.6",
+        "php": "~8.1",
+        "innmind/immutable": "~4.0",
         "doctrine/orm": "^2.7",
         "ramsey/uuid": "^4.0",
-        "innmind/specification": "^2.0",
-        "innmind/reflection": "^4.0"
+        "innmind/specification": "~3.0"
     },
     "autoload": {
         "psr-4": {
             "Innmind\\Doctrine\\": "src/"
-        },
-        "files": ["src/functions.php"]
+        }
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\Innmind\\Doctrine\\": "tests/",
             "Fixtures\\Innmind\\Doctrine\\": "fixtures/",
-            "Properties\\Innmind\\Doctrine\\": "properties/",
             "Example\\Innmind\\Doctrine\\": "example/"
         }
     },
@@ -40,7 +37,7 @@
         "phpunit/phpunit": "~9.0",
         "vimeo/psalm": "~4.4",
         "innmind/black-box": "~4.10",
-        "innmind/coding-standard": "^1.1",
+        "innmind/coding-standard": "~2.0",
         "scienta/doctrine-json-functions": "^4.3",
         "symfony/cache": "^5.0"
     },

@@ -20,23 +20,23 @@ final class JsonArray implements Comparator
 {
     use Composable;
 
+    /** @var non-empty-string */
     private string $property;
-    /** @var mixed */
-    private $value;
+    private mixed $value;
 
     /**
-     * @param mixed $value
+     * @param non-empty-string $property
      */
-    private function __construct(string $property, $value)
+    private function __construct(string $property, mixed $value)
     {
         $this->property = $property;
         $this->value = $value;
     }
 
     /**
-     * @param mixed $value
+     * @param non-empty-string $property
      */
-    public static function contains(string $property, $value): self
+    public static function contains(string $property, mixed $value): self
     {
         return new self($property, $value);
     }
@@ -48,10 +48,10 @@ final class JsonArray implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::contains();
+        return Sign::contains;
     }
 
-    public function value()
+    public function value(): mixed
     {
         return $this->value;
     }

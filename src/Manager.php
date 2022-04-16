@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Doctrine;
 
 use Innmind\Doctrine\Exception\NestedMutationNotSupported;
+use Innmind\Immutable\Either;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class Manager
@@ -11,9 +12,14 @@ final class Manager
     private EntityManagerInterface $entityManager;
     private bool $mutating = false;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    private function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+    }
+
+    public static function of(EntityManagerInterface $entityManager): self
+    {
+        return new self($entityManager);
     }
 
     /**
@@ -33,48 +39,59 @@ final class Manager
     }
 
     /**
+     * @template L
      * @template R
      *
-     * @param callable(self): R $mutate
+     * @param callable(self): Either<L, R> $mutate
      *
      * @throws NestedMutationNotSupported
      *
-     * @return R
+     * @return Either<L, R>
      */
-    public function mutate(callable $mutate)
+    public function mutate(callable $mutate): Either
     {
         $this->enterMutation();
 
         try {
-            $return = $mutate($this);
-            $this->entityManager->flush();
+            return $mutate($this)
+                ->map(function(mixed $right): mixed {
+                    $this->entityManager->flush();
+                    $this->leaveMutation();
 
-            return $return;
+                    return $right;
+                })
+                ->leftMap(function(mixed $left): mixed {
+                    $this->entityManager->close();
+                    $this->leaveMutation();
+
+                    return $left;
+                });
         } catch (\Throwable $e) {
             $this->entityManager->close();
+            $this->leaveMutation();
 
             throw $e;
-        } finally {
-            $this->leaveMutation();
         }
     }
 
     /**
+     * @template L
      * @template R
      *
-     * @param callable(self, callable(): void): R $mutate The second argument allow to perform periodic flushes
+     * @param callable(self, callable(): void): Either<L, R> $mutate The second argument allow to perform periodic flushes
      *
      * @throws NestedMutationNotSupported
      *
-     * @return R
+     * @return Either<L, R>
      */
-    public function transaction(callable $mutate)
+    public function transaction(callable $mutate): Either
     {
         $this->enterMutation();
 
         try {
             $this->entityManager->beginTransaction();
-            $return = $mutate(
+
+            return $mutate(
                 $this,
                 function(): void {
                     // this is fine in a transaction as the flushed entities can
@@ -82,17 +99,25 @@ final class Manager
                     $this->entityManager->flush();
                     $this->entityManager->clear();
                 },
-            );
-            $this->entityManager->flush();
-            $this->entityManager->commit();
+            )
+                ->map(function(mixed $right): mixed {
+                    $this->entityManager->flush();
+                    $this->entityManager->commit();
+                    $this->leaveMutation();
 
-            return $return;
+                    return $right;
+                })
+                ->leftMap(function(mixed $left): mixed {
+                    $this->entityManager->rollback();
+                    $this->leaveMutation();
+
+                    return $left;
+                });
         } catch (\Throwable $e) {
             $this->entityManager->rollback();
+            $this->leaveMutation();
 
             throw $e;
-        } finally {
-            $this->leaveMutation();
         }
     }
 

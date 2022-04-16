@@ -53,14 +53,14 @@ final class ToQueryBuilder
 
     public function __construct(
         EntityRepository $repository,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
     ) {
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->repository = $repository;
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->manager = $manager;
         /** @var Map<array{0: string, 1: string, 2: mixed}, string> */
-        $this->children = Map::of('array', 'mixed');
+        $this->children = Map::of();
     }
 
     public function __invoke(Specification $specification): QueryBuilder
@@ -73,7 +73,7 @@ final class ToQueryBuilder
          * @psalm-suppress ImpureMethodCall
          * @var Map<array{0: string, 1: string, 2: mixed}, string>
          */
-        $this->children = Map::of('array', 'string');
+        $this->children = Map::of();
 
         /** @psalm-suppress ImpureMethodCall */
         $qb = $this->repository->createQueryBuilder('entity');
@@ -97,7 +97,7 @@ final class ToQueryBuilder
         }
 
         /** @psalm-suppress ImpureMethodCall */
-        $this->children->foreach(function(array $key, string $alias) use ($qb): void {
+        $_ = $this->children->foreach(function(array $key, string $alias) use ($qb): void {
             /** @var mixed $value */
             [$relation, $field, $value] = $key;
 
@@ -122,7 +122,7 @@ final class ToQueryBuilder
     private function visit(
         Specification $specification,
         QueryBuilder $qb,
-        callable $alias
+        callable $alias,
     ) {
         if ($specification instanceof Child) {
             return $this->child($specification, $qb);
@@ -144,21 +144,19 @@ final class ToQueryBuilder
             throw new SpecificationNotSuported(\get_class($specification));
         }
 
-        if ($specification->operator()->equals(Operator::and())) {
-            /** @psalm-suppress ImpureMethodCall */
-            return $qb
+        /** @psalm-suppress ImpureMethodCall */
+        return match ($specification->operator()) {
+            Operator::and => $qb
                 ->expr()
                 ->andX()
                 ->add($this->visit($specification->left(), $qb, $alias))
-                ->add($this->visit($specification->right(), $qb, $alias));
-        }
-
-        /** @psalm-suppress ImpureMethodCall */
-        return $qb
-            ->expr()
-            ->orX()
-            ->add($this->visit($specification->left(), $qb, $alias))
-            ->add($this->visit($specification->right(), $qb, $alias));
+                ->add($this->visit($specification->right(), $qb, $alias)),
+            Operator::or => $qb
+                ->expr()
+                ->orX()
+                ->add($this->visit($specification->left(), $qb, $alias))
+                ->add($this->visit($specification->right(), $qb, $alias)),
+        };
     }
 
     /**
@@ -171,7 +169,7 @@ final class ToQueryBuilder
     private function expression(
         Comparator $specification,
         QueryBuilder $qb,
-        callable $alias
+        callable $alias,
     ) {
         $property = "entity.{$specification->property()}";
         $relation = null;
@@ -190,80 +188,52 @@ final class ToQueryBuilder
 
         $property = $this->decodeJson($property, $field, $relation);
 
-        switch ($specification->sign()) {
-            case Sign::equality():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->eq($property, $placeholder);
-
-            case Sign::inequality():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->neq($property, $placeholder);
-
-            case Sign::lessThan():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->lt($property, $placeholder);
-
-            case Sign::moreThan():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->gt($property, $placeholder);
-
-            case Sign::lessThanOrEqual():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->lte($property, $placeholder);
-
-            case Sign::moreThanOrEqual():
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->gte($property, $placeholder);
-
-            case Sign::isNull():
-                return $qb->expr()->isNull($property);
-
-            case Sign::isNotNull():
-                return $qb->expr()->isNotNull($property);
-
-            case Sign::startsWith():
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    $specification->value().'%',
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::endsWith():
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    '%'.$specification->value(),
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::contains():
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    '%'.$specification->value().'%',
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::in():
-                $placeholder = $this->placeholder(
-                    $specification->value(),
-                    $qb,
-                );
-
-                return $qb->expr()->in($property, $placeholder);
-        }
-
-        throw new ComparisonNotSupported((string) $specification->sign());
+        /** @psalm-suppress MixedOperand Due to the implicit string cast in the LIKE */
+        return match ($specification->sign()) {
+            Sign::equality => $qb->expr()->eq(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::inequality => $qb->expr()->neq(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::lessThan => $qb->expr()->lt(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::moreThan => $qb->expr()->gt(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::lessThanOrEqual => $qb->expr()->lte(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::moreThanOrEqual => $qb->expr()->gte(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::isNull => $qb->expr()->isNull($property),
+            Sign::isNotNull => $qb->expr()->isNotNull($property),
+            Sign::startsWith => $qb->expr()->like(
+                $property,
+                $this->placeholder($specification->value().'%', $qb),
+            ),
+            Sign::endsWith => $qb->expr()->like(
+                $property,
+                $this->placeholder('%'.$specification->value(), $qb),
+            ),
+            Sign::contains => $qb->expr()->like(
+                $property,
+                $this->placeholder('%'.$specification->value().'%', $qb),
+            ),
+            Sign::in => $qb->expr()->in(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            default => throw new ComparisonNotSupported($specification->sign()->name),
+        };
     }
 
     /**
@@ -299,7 +269,7 @@ final class ToQueryBuilder
     private function decodeJson(
         string $property,
         string $field,
-        ?string $relation
+        ?string $relation,
     ): string {
         if ($this->type($field, $relation) instanceof JsonType) {
             return "json_value($property, '$')";
@@ -345,14 +315,18 @@ final class ToQueryBuilder
         [$relation, $field] = \explode('.', $specification->property());
         $key = [$relation, $field, $specification->value()];
 
-        if ($this->children->contains($key)) {
-            return $this->children->get($key);
-        }
+        return $this
+            ->children
+            ->get($key)
+            ->match(
+                static fn($child) => $child,
+                function() use ($relation, $key): string {
+                    $alias = "$relation{$this->children->size()}";
+                    $this->children = ($this->children)($key, $alias);
 
-        $alias = "$relation{$this->children->size()}";
-        $this->children = ($this->children)($key, $alias);
-
-        return $alias;
+                    return $alias;
+                },
+            );
     }
 
     /**
@@ -363,7 +337,7 @@ final class ToQueryBuilder
     private function matchJson(
         QueryBuilder $qb,
         string $property,
-        JsonArray $specification
+        JsonArray $specification,
     ) {
         // the sql json_contains function expects the value to be searched to be
         // json encoded otherwise the value will never be found

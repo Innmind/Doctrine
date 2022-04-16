@@ -9,9 +9,8 @@ use Innmind\Doctrine\{
     Exception\NestedMutationNotSupported,
     Exception\MutationOutsideOfContext,
 };
-use Doctrine\ORM\{
-    EntityManagerInterface,
-};
+use Innmind\Immutable\Either;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -29,7 +28,7 @@ class ManagerTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function($entityClass) {
-                $manager = new Manager(
+                $manager = Manager::of(
                     $em = $this->createMock(EntityManagerInterface::class),
                 );
                 $em
@@ -50,7 +49,7 @@ class ManagerTest extends TestCase
 
     public function testNestedMutationThrows()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $this->createMock(EntityManagerInterface::class),
         );
 
@@ -61,25 +60,46 @@ class ManagerTest extends TestCase
 
     public function testUseSameInstanceOfManagerInMutationContext()
     {
-        $manager = new Manager($this->createMock(EntityManagerInterface::class));
+        $manager = Manager::of($this->createMock(EntityManagerInterface::class));
 
-        $this->assertNull($manager->mutate(function($inner) use ($manager) {
-            $this->assertSame($manager, $inner);
-        }));
+        $this->assertTrue(
+            $manager
+                ->mutate(function($inner) use ($manager) {
+                    $this->assertSame($manager, $inner);
+
+                    return Either::right(null);
+                })
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
     }
 
     public function testFlushOnceTheMutationIsDone()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
             ->expects($this->exactly(2))
             ->method('flush');
 
-        $this->assertNull($manager->mutate(static fn() => null));
-        $this->assertNull(
-            $manager->mutate(static fn() => null),
+        $this->assertTrue(
+            $manager
+                ->mutate(static fn() => Either::right(null))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+        $this->assertTrue(
+            $manager
+                ->mutate(static fn() => Either::right(null))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
             'Multiple mutations should be allowed',
         );
     }
@@ -89,20 +109,52 @@ class ManagerTest extends TestCase
         $this
             ->forAll(Set\Integers::any())
             ->then(function($return) {
-                $manager = new Manager(
+                $manager = Manager::of(
                     $this->createMock(EntityManagerInterface::class),
                 );
 
                 $this->assertSame(
                     $return,
-                    $manager->mutate(static fn() => $return),
+                    $manager
+                        ->mutate(static fn() => Either::right($return))
+                        ->match(
+                            static fn($value) => $value,
+                            static fn() => null,
+                        ),
+                );
+            });
+    }
+
+    public function testCloseTheEntityManagerWhenMutationReturnsAnError()
+    {
+        $this
+            ->forAll(Set\AnyType::any())
+            ->then(function($return) {
+                $manager = Manager::of(
+                    $em = $this->createMock(EntityManagerInterface::class),
+                );
+                $em
+                    ->expects($this->once())
+                    ->method('close');
+                $return = new \Exception;
+
+                $this->assertSame(
+                    $return,
+                    $manager
+                        ->mutate(static function() use ($return) {
+                            return Either::left($return);
+                        })
+                        ->match(
+                            static fn() => null,
+                            static fn($e) => $e,
+                        ),
                 );
             });
     }
 
     public function testCloseTheEntityManagerWhenExceptionOccursDuringMutation()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
@@ -128,7 +180,7 @@ class ManagerTest extends TestCase
                 User::any(),
             )
             ->then(function($entityClass, $entity) {
-                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+                $manager = Manager::of($this->createMock(EntityManagerInterface::class));
                 $repository = $manager->repository($entityClass);
 
                 $this->expectException(MutationOutsideOfContext::class);
@@ -145,19 +197,21 @@ class ManagerTest extends TestCase
                 User::any(),
             )
             ->then(function($entityClass, $entity) {
-                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+                $manager = Manager::of($this->createMock(EntityManagerInterface::class));
 
                 $manager->mutate(function($manager) use ($entityClass, $entity) {
                     $repository = $manager->repository($entityClass);
 
                     $this->assertNull($repository->add($entity));
+
+                    return Either::right(null);
                 });
             });
     }
 
     public function testNestedTransactionsThrows()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $this->createMock(EntityManagerInterface::class),
         );
 
@@ -168,7 +222,7 @@ class ManagerTest extends TestCase
 
     public function testRollbackWhenAnExceptionIsThrown()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
@@ -186,8 +240,13 @@ class ManagerTest extends TestCase
             $this->fail('it should throw');
         } catch (\Throwable $e) {
             $this->assertSame($exception, $e);
-            $this->assertNull(
-                $manager->transaction(static fn() => null),
+            $this->assertTrue(
+                $manager
+                    ->transaction(static fn() => Either::right(null))
+                    ->match(
+                        static fn() => true,
+                        static fn() => false,
+                    ),
                 'the manager should be healthy after a failed transaction',
             );
         }
@@ -198,7 +257,7 @@ class ManagerTest extends TestCase
         $this
             ->forAll(Set\Unicode::strings())
             ->then(function($return) {
-                $manager = new Manager(
+                $manager = Manager::of(
                     $em = $this->createMock(EntityManagerInterface::class),
                 );
                 $em
@@ -213,10 +272,20 @@ class ManagerTest extends TestCase
 
                 $this->assertSame(
                     $return,
-                    $manager->transaction(static fn() => $return),
+                    $manager
+                        ->transaction(static fn() => Either::right($return))
+                        ->match(
+                            static fn($value) => $value,
+                            static fn() => null,
+                        ),
                 );
-                $this->assertNull(
-                    $manager->transaction(static fn() => null),
+                $this->assertTrue(
+                    $manager
+                        ->transaction(static fn() => Either::right(null))
+                        ->match(
+                            static fn() => true,
+                            static fn() => false,
+                        ),
                     'the manager should be healthy after a transaction',
                 );
             });
@@ -224,11 +293,20 @@ class ManagerTest extends TestCase
 
     public function testUseSameInstanceOfManagerInTransactionContext()
     {
-        $manager = new Manager($this->createMock(EntityManagerInterface::class));
+        $manager = Manager::of($this->createMock(EntityManagerInterface::class));
 
-        $this->assertNull($manager->transaction(function($inner) use ($manager) {
-            $this->assertSame($manager, $inner);
-        }));
+        $this->assertTrue(
+            $manager
+                ->transaction(function($inner) use ($manager) {
+                    $this->assertSame($manager, $inner);
+
+                    return Either::right(null);
+                })
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
     }
 
     public function testAllowMutationInTransaction()
@@ -239,19 +317,21 @@ class ManagerTest extends TestCase
                 User::any(),
             )
             ->then(function($entityClass, $entity) {
-                $manager = new Manager($this->createMock(EntityManagerInterface::class));
+                $manager = Manager::of($this->createMock(EntityManagerInterface::class));
 
                 $manager->transaction(function($manager) use ($entityClass, $entity) {
                     $repository = $manager->repository($entityClass);
 
                     $this->assertNull($repository->add($entity));
+
+                    return Either::right(null);
                 });
             });
     }
 
     public function testAllowPeriodicFlushesInTransaction()
     {
-        $manager = new Manager(
+        $manager = Manager::of(
             $em = $this->createMock(EntityManagerInterface::class),
         );
         $em
@@ -267,6 +347,6 @@ class ManagerTest extends TestCase
             ->expects($this->once())
             ->method('commit');
 
-        $manager->transaction(static fn($_, $flush) => $flush());
+        $manager->transaction(static fn($_, $flush) => Either::right($flush()));
     }
 }

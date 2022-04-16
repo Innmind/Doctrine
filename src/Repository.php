@@ -3,12 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine;
 
-use Innmind\Doctrine\{
-    Specification\ToQueryBuilder,
-    Exception\EntityNotFound,
-    Exception\MutationOutsideOfContext,
-};
+use Innmind\Doctrine\Exception\MutationOutsideOfContext;
 use Innmind\Specification\Specification;
+use Innmind\Immutable\Maybe;
 use Doctrine\ORM\{
     EntityManagerInterface,
     EntityRepository,
@@ -26,13 +23,14 @@ final class Repository
     private \Closure $allowMutation;
 
     /**
+     * @internal
      * @param class-string<T> $entityClass
      * @param \Closure(): bool $allowMutation
      */
     public function __construct(
         EntityManagerInterface $doctrine,
         string $entityClass,
-        \Closure $allowMutation = null
+        \Closure $allowMutation = null,
     ) {
         $this->doctrine = $doctrine;
         $this->entityClass = $entityClass;
@@ -42,19 +40,11 @@ final class Repository
     /**
      * @param Id<T> $id
      *
-     * @throws EntityNotFound
-     *
-     * @return T
+     * @return Maybe<T>
      */
-    public function get(Id $id): object
+    public function get(Id $id): Maybe
     {
-        $entity = $this->doctrine->find($this->entityClass, $id);
-
-        if (\is_null($entity)) {
-            throw new EntityNotFound($id->toString());
-        }
-
-        return $entity;
+        return Maybe::of($this->doctrine->find($this->entityClass, $id));
     }
 
     /**
@@ -62,7 +52,10 @@ final class Repository
      */
     public function contains(Id $id): bool
     {
-        return !\is_null($this->doctrine->find($this->entityClass, $id));
+        return $this->get($id)->match(
+            static fn() => true,
+            static fn() => false,
+        );
     }
 
     /**
@@ -93,46 +86,23 @@ final class Repository
         $this->doctrine->remove($entity);
     }
 
-    public function matching(Specification $specification): Sequence
+    /**
+     * @return Matching<T>
+     */
+    public function matching(Specification $specification): Matching
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($repository instanceof EntityRepository) {
-            return new Sequence\DeferQuery(
-                (new ToQueryBuilder($repository, $this->doctrine))($specification),
-            );
-        }
-
-        /** @psalm-suppress MixedArgument */
-        return new Sequence\DeferFindBy(
-            $repository,
-            $specification,
-        );
+        return Matching::of($this->doctrine, $repository, $specification);
     }
 
     /**
-     * @return Sequence<T>
+     * @return Matching<T>
      */
-    public function all(): Sequence
+    public function all(): Matching
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($repository instanceof EntityRepository) {
-            /** @var Sequence<T> */
-            return new Sequence\DeferQuery(
-                $repository->createQueryBuilder('entity'),
-            );
-        }
-
-        /**
-         * @psalm-suppress MixedArgument
-         * @psalm-suppress MixedMethodCall
-         * @var Sequence<T>
-         */
-        return Sequence\Concrete::of(
-            ...$repository->findAll(),
-        );
+        return Matching::all($this->doctrine, $repository);
     }
 }

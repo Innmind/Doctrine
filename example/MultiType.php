@@ -6,6 +6,7 @@ namespace Example\Innmind\Doctrine;
 use Innmind\Specification\{
     Comparator,
     Sign,
+    Composable,
 };
 
 final class MultiType implements Comparator
@@ -14,28 +15,28 @@ final class MultiType implements Comparator
 
     private string $property;
     private Sign $sign;
-    private $value;
+    private mixed $value;
 
-    private function __construct(string $property, Sign $sign, $value)
+    private function __construct(string $property, Sign $sign, mixed $value)
     {
         $this->property = $property;
         $this->sign = $sign;
         $this->value = $value;
     }
 
-    public static function of($value): self
+    public static function of(mixed $value): self
     {
-        return new self('multiType', Sign::equality(), $value);
+        return new self('multiType', Sign::equality, $value);
     }
 
-    public static function contains($value): self
+    public static function contains(mixed $value): self
     {
-        return new self('multiType', Sign::contains(), $value);
+        return new self('multiType', Sign::contains, $value);
     }
 
-    public static function child($value): self
+    public static function child(mixed $value): self
     {
-        return new self('children.multiType', Sign::equality(), $value);
+        return new self('children.multiType', Sign::equality, $value);
     }
 
     public function property(): string
@@ -48,7 +49,7 @@ final class MultiType implements Comparator
         return $this->sign;
     }
 
-    public function value()
+    public function value(): mixed
     {
         return $this->value;
     }

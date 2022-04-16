@@ -46,7 +46,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -89,7 +89,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -132,7 +132,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::lessThan());
+                    ->willReturn(Sign::lessThan);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -175,7 +175,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::moreThan());
+                    ->willReturn(Sign::moreThan);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -218,7 +218,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::lessThanOrEqual());
+                    ->willReturn(Sign::lessThanOrEqual);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -261,7 +261,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::moreThanOrEqual());
+                    ->willReturn(Sign::moreThanOrEqual);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -304,7 +304,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::isNull());
+                    ->willReturn(Sign::isNull);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -347,7 +347,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::isNotNull());
+                    ->willReturn(Sign::isNotNull);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -390,7 +390,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::startsWith());
+                    ->willReturn(Sign::startsWith);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -433,7 +433,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::endsWith());
+                    ->willReturn(Sign::endsWith);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -476,7 +476,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::contains());
+                    ->willReturn(Sign::contains);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -522,7 +522,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::in());
+                    ->willReturn(Sign::in);
                 $specification
                     ->method('value')
                     ->willReturn($values);
@@ -565,7 +565,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $innerSpecification
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $innerSpecification
                     ->method('value')
                     ->willReturn($value);
@@ -614,7 +614,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($leftProperty);
                 $left
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->method('value')
                     ->willReturn($leftValue);
@@ -624,7 +624,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($rightProperty);
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -637,7 +637,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right);
                 $specification
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -680,7 +680,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($leftProperty);
                 $left
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->method('value')
                     ->willReturn($leftValue);
@@ -690,7 +690,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($rightProperty);
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -703,7 +703,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right);
                 $specification
                     ->method('operator')
-                    ->willReturn(Operator::or());
+                    ->willReturn(Operator::or);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -747,7 +747,7 @@ class ToQueryBuilderTest extends TestCase
                 $right1Property,
                 $right1Value,
                 $right2Property,
-                $right2Value
+                $right2Value,
             ) {
                 $left = $this->createMock(Comparator::class);
                 $left
@@ -755,7 +755,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($leftProperty);
                 $left
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->method('value')
                     ->willReturn($leftValue);
@@ -765,7 +765,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right1Property);
                 $right1
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right1
                     ->method('value')
                     ->willReturn($right1Value);
@@ -775,7 +775,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right2Property);
                 $right2
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right2
                     ->method('value')
                     ->willReturn($right2Value);
@@ -788,7 +788,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right2);
                 $right
                     ->method('operator')
-                    ->willReturn(Operator::or());
+                    ->willReturn(Operator::or);
                 $specification = $this->createMock(Composite::class);
                 $specification
                     ->method('left')
@@ -798,7 +798,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right);
                 $specification
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -842,7 +842,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$property");
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -897,7 +897,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$leftProperty");
                 $left
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->method('value')
                     ->willReturn($leftValue);
@@ -907,7 +907,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$rightProperty");
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -920,7 +920,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right);
                 $specification
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -969,7 +969,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -1050,7 +1050,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$join");
                 $specificationJoin
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationJoin
                     ->method('value')
                     ->willReturn($value1);
@@ -1060,7 +1060,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$property");
                 $specificationCondition
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationCondition
                     ->method('value')
                     ->willReturn($value2);
@@ -1121,7 +1121,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$join");
                 $specificationJoin
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationJoin
                     ->method('value')
                     ->willReturn($value1);
@@ -1131,7 +1131,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$property1");
                 $specificationCondition1
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationCondition1
                     ->method('value')
                     ->willReturn($value2);
@@ -1141,7 +1141,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$property2");
                 $specificationCondition2
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationCondition2
                     ->method('value')
                     ->willReturn($value3);
@@ -1208,7 +1208,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$join1");
                 $specificationJoin1
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationJoin1
                     ->method('value')
                     ->willReturn($value1);
@@ -1218,7 +1218,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$join2");
                 $specificationJoin2
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationJoin2
                     ->method('value')
                     ->willReturn($value2);
@@ -1228,7 +1228,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$property");
                 $specificationCondition
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specificationCondition
                     ->method('value')
                     ->willReturn($value3);

@@ -26,24 +26,22 @@ final class ToArray
     public function __invoke(Specification $specification): array
     {
         if ($specification instanceof Comparator) {
-            if (!$specification->sign()->equals(Sign::equality())) {
-                throw new ComparisonNotSupported((string) $specification->sign());
-            }
-
-            return [$specification->property() => $specification->value()];
+            return match ($specification->sign()) {
+                Sign::equality => [$specification->property() => $specification->value()],
+                default => throw new ComparisonNotSupported($specification->sign()->name),
+            };
         }
 
         if (!$specification instanceof Composite) {
             throw new OnlyAndCompositeSupported;
         }
 
-        if (!$specification->operator()->equals(Operator::and())) {
-            throw new OnlyAndCompositeSupported;
-        }
-
-        return \array_merge(
-            $this($specification->left()),
-            $this($specification->right()),
-        );
+        return match ($specification->operator()) {
+            Operator::and => \array_merge(
+                $this($specification->left()),
+                $this($specification->right()),
+            ),
+            default => throw new OnlyAndCompositeSupported,
+        };
     }
 }
