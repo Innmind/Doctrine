@@ -6,6 +6,7 @@ namespace Example\Innmind\Doctrine;
 use Innmind\Specification\{
     Comparator,
     Sign,
+    Composable,
 };
 
 final class Child implements Comparator
@@ -31,7 +32,7 @@ final class Child implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return Sign::equality;
     }
 
     public function value(): string

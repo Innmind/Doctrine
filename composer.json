@@ -15,11 +15,11 @@
         "issues": "http://github.com/innmind/doctrine/issues"
     },
     "require": {
-        "php": "~7.4|~8.0",
+        "php": "~8.1",
         "innmind/immutable": "^3.6",
         "doctrine/orm": "^2.7",
         "ramsey/uuid": "^4.0",
-        "innmind/specification": "^2.0",
+        "innmind/specification": "~3.0",
         "innmind/reflection": "^4.0"
     },
     "autoload": {

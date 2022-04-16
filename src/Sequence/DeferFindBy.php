@@ -17,6 +17,7 @@ use Doctrine\Persistence\ObjectRepository;
  */
 final class DeferFindBy implements Sequence
 {
+    /** @var ObjectRepository<object> */
     private ObjectRepository $repository;
     private Specification $specification;
     /** @var array<string, string> */

@@ -144,21 +144,19 @@ final class ToQueryBuilder
             throw new SpecificationNotSuported(\get_class($specification));
         }
 
-        if ($specification->operator()->equals(Operator::and())) {
-            /** @psalm-suppress ImpureMethodCall */
-            return $qb
+        /** @psalm-suppress ImpureMethodCall */
+        return match ($specification->operator()) {
+            Operator::and => $qb
                 ->expr()
                 ->andX()
                 ->add($this->visit($specification->left(), $qb, $alias))
-                ->add($this->visit($specification->right(), $qb, $alias));
-        }
-
-        /** @psalm-suppress ImpureMethodCall */
-        return $qb
-            ->expr()
-            ->orX()
-            ->add($this->visit($specification->left(), $qb, $alias))
-            ->add($this->visit($specification->right(), $qb, $alias));
+                ->add($this->visit($specification->right(), $qb, $alias)),
+            Operator::or => $qb
+                ->expr()
+                ->orX()
+                ->add($this->visit($specification->left(), $qb, $alias))
+                ->add($this->visit($specification->right(), $qb, $alias)),
+        };
     }
 
     /**
@@ -191,43 +189,43 @@ final class ToQueryBuilder
         $property = $this->decodeJson($property, $field, $relation);
 
         switch ($specification->sign()) {
-            case Sign::equality():
+            case Sign::equality:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->eq($property, $placeholder);
 
-            case Sign::inequality():
+            case Sign::inequality:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->neq($property, $placeholder);
 
-            case Sign::lessThan():
+            case Sign::lessThan:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->lt($property, $placeholder);
 
-            case Sign::moreThan():
+            case Sign::moreThan:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->gt($property, $placeholder);
 
-            case Sign::lessThanOrEqual():
+            case Sign::lessThanOrEqual:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->lte($property, $placeholder);
 
-            case Sign::moreThanOrEqual():
+            case Sign::moreThanOrEqual:
                 $placeholder = $this->placeholder($specification->value(), $qb);
 
                 return $qb->expr()->gte($property, $placeholder);
 
-            case Sign::isNull():
+            case Sign::isNull:
                 return $qb->expr()->isNull($property);
 
-            case Sign::isNotNull():
+            case Sign::isNotNull:
                 return $qb->expr()->isNotNull($property);
 
-            case Sign::startsWith():
+            case Sign::startsWith:
                 /** @psalm-suppress MixedOperand */
                 $placeholder = $this->placeholder(
                     $specification->value().'%',
@@ -236,7 +234,7 @@ final class ToQueryBuilder
 
                 return $qb->expr()->like($property, $placeholder);
 
-            case Sign::endsWith():
+            case Sign::endsWith:
                 /** @psalm-suppress MixedOperand */
                 $placeholder = $this->placeholder(
                     '%'.$specification->value(),
@@ -245,7 +243,7 @@ final class ToQueryBuilder
 
                 return $qb->expr()->like($property, $placeholder);
 
-            case Sign::contains():
+            case Sign::contains:
                 /** @psalm-suppress MixedOperand */
                 $placeholder = $this->placeholder(
                     '%'.$specification->value().'%',
@@ -254,7 +252,7 @@ final class ToQueryBuilder
 
                 return $qb->expr()->like($property, $placeholder);
 
-            case Sign::in():
+            case Sign::in:
                 $placeholder = $this->placeholder(
                     $specification->value(),
                     $qb,
@@ -263,7 +261,7 @@ final class ToQueryBuilder
                 return $qb->expr()->in($property, $placeholder);
         }
 
-        throw new ComparisonNotSupported((string) $specification->sign());
+        throw new ComparisonNotSupported($specification->sign()->name);
     }
 
     /**

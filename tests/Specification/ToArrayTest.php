@@ -40,7 +40,7 @@ class ToArrayTest extends TestCase
         $specification
             ->expects($this->once())
             ->method('operator')
-            ->willReturn(Operator::or());
+            ->willReturn(Operator::or);
 
         (new ToArray)($specification);
     }
@@ -49,17 +49,17 @@ class ToArrayTest extends TestCase
     {
         $this
             ->forAll(Set\Elements::of(
-                'inequality',
-                'lessThan',
-                'moreThan',
-                'lessThanOrEqual',
-                'moreThanOrEqual',
-                'isNull',
-                'isNotNull',
-                'startsWith',
-                'endsWith',
-                'contains',
-                'in',
+                Sign::inequality,
+                Sign::lessThan,
+                Sign::moreThan,
+                Sign::lessThanOrEqual,
+                Sign::moreThanOrEqual,
+                Sign::isNull,
+                Sign::isNotNull,
+                Sign::startsWith,
+                Sign::endsWith,
+                Sign::contains,
+                Sign::in,
             ))
             ->then(function($sign) {
                 $this->expectException(ComparisonNotSupported::class);
@@ -68,7 +68,7 @@ class ToArrayTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::$sign());
+                    ->willReturn($sign);
 
                 (new ToArray)($specification);
             });
@@ -86,7 +86,7 @@ class ToArrayTest extends TestCase
                 $specification
                     ->expects($this->once())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->expects($this->once())
                     ->method('property')
@@ -117,7 +117,7 @@ class ToArrayTest extends TestCase
                 $left
                     ->expects($this->once())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->expects($this->once())
                     ->method('property')
@@ -130,7 +130,7 @@ class ToArrayTest extends TestCase
                 $right
                     ->expects($this->once())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $right
                     ->expects($this->once())
                     ->method('property')
@@ -143,7 +143,7 @@ class ToArrayTest extends TestCase
                 $and
                     ->expects($this->once())
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $and
                     ->expects($this->once())
                     ->method('left')

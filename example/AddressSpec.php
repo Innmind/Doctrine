@@ -7,6 +7,7 @@ use Innmind\Doctrine\Specification\Child;
 use Innmind\Specification\{
     Comparator,
     Sign,
+    Composable,
 };
 
 final class AddressSpec implements Comparator
@@ -15,9 +16,9 @@ final class AddressSpec implements Comparator
 
     private string $property;
     private Sign $sign;
-    private $value;
+    private bool|string $value;
 
-    private function __construct(string $property, Sign $sign, $value)
+    private function __construct(string $property, Sign $sign, bool|string $value)
     {
         $this->property = $property;
         $this->sign = $sign;
@@ -27,16 +28,16 @@ final class AddressSpec implements Comparator
     public static function primary(string $address): Child
     {
         return new Child(
-            new self('addresses.main', Sign::equality(), true),
-            new self('addresses.address', Sign::contains(), $address),
+            new self('addresses.main', Sign::equality, true),
+            new self('addresses.address', Sign::contains, $address),
         );
     }
 
     public static function secondary(string $address): Child
     {
         return new Child(
-            new self('addresses.main', Sign::equality(), false),
-            new self('addresses.address', Sign::contains(), $address),
+            new self('addresses.main', Sign::equality, false),
+            new self('addresses.address', Sign::contains, $address),
         );
     }
 
@@ -50,7 +51,7 @@ final class AddressSpec implements Comparator
         return $this->sign;
     }
 
-    public function value()
+    public function value(): bool|string
     {
         return $this->value;
     }
