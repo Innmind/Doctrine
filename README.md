@@ -29,22 +29,6 @@ composer require innmind/doctrine
 
 In case you really want to use sets, you may use [`innmind/immutable`](https://github.com/innmind/immutable/#set).
 
-### `Sequence` is not an iterator
-
-Iterators are widely used as they can be used in `foreach` statements, however as described above iterators contains an implicit state: their cursor. This can lead to bugs as it allows us to do `\current($iterator)` (frequently used to get the first value) but the returned value may defer if some other function moved the iterator's cursor prior to that call.
-
-### Minimal `Sequence` interface
-
-The interface doesn't include methods such as `first`, `last` or `get($index)` as it tends to lead to calls based on asumptions that the sequence has a given size.
-
-`Sequence`s here are used as a collection of elements that match a predicate. This means that a collection may be empty in any given case, thus forcing you to check the size before accessing a value.
-
-### `Sequence`s are immutable
-
-With immutable structures you avoid implicit changes when passing the sequence as an argument to another method. You will never have a change of order or a change of number of elements.
-
-The only state change left is the state of your entities, but this is an _explicit_ location for a change of state.
-
 ### Enforcing the use of an `Id`
 
 Doctrine allows you to generate an id for you when your entities are persisted. This is an implicit state change.
@@ -56,8 +40,6 @@ The unique solution (that I'm aware of) is to use `UUID`s. The `Id` provided by 
 ### A single `Id` class for all entities
 
 This is no longer a problem as it is provided with a template understood by [`vimeo/psalm`](https://github.com/vimeo/psalm/blob/master/docs/annotating_code/templated_annotations.md).
-
-The class is not declared final in case you really need to extend the behaviour.
 
 ### No `flush` method on the `Manager`
 
@@ -73,10 +55,13 @@ All the use cases below use the code declared in the [`example` folder](example/
 Pre-requisite for all use cases:
 
 ```php
-use Innmind\Doctrine\Manager;
+use Innmind\Doctrine\{
+    Manager,
+    Sort,
+};
 use Example\Innmind\Doctrine\User;
 
-$manager = new Manager($entityManager);
+$manager = Manager::of($entityManager);
 ```
 
 ### Fetching all entities from the database
@@ -85,7 +70,8 @@ $manager = new Manager($entityManager);
 $manager
     ->repository(User::class)
     ->all()
-    ->sort('username', 'asc')
+    ->sort('username', Sort::asc)
+    ->fetch()
     ->foreach(function(User $user): void {
         echo $user->username()."\n";
     });
@@ -100,9 +86,10 @@ $numberOfElementPerPage = 10;
 $manager
     ->repository(User::class)
     ->all()
-    ->sort('username', 'asc')
+    ->sort('username', Sort::asc)
     ->drop($page * $numberOfElementPerPage)
     ->take($numberOfElementPerPage)
+    ->fetch()
     ->foreach(function(User $user): void {
         echo $user->username()."\n";
     });
@@ -122,9 +109,10 @@ $manager
             Username::of('jane'),
         ),
     )
-    ->sort('username', 'asc')
+    ->sort('username', Sort::asc)
     ->drop(20)
     ->take(10)
+    ->fetch()
     ->foreach(function(User $user): void {
         echo $user->username()."\n";
     });
@@ -138,8 +126,9 @@ This example is the equivalent of `SELECT * FROM user WHERE username = 'alice' O
 
 ```php
 use Innmind\Doctrine\Id;
+use Innmind\Immutable\Either;
 
-$user = $manager->mutate(function($manager): User {
+$user = $manager->mutate(function($manager): Either {
     $user = new User(
         Id::new(),
         'someone',
@@ -148,18 +137,18 @@ $user = $manager->mutate(function($manager): User {
         ->repository(User::class)
         ->add($user);
 
-    return $user;
+    return Either::right($user);
 });
 ```
 
 If you try to call `Repository::add()` or `Repository::remove()` outside the function it will raise an exception.
 
-**Note**: If the function throws an exception nothing will be flushed to the database.
+**Note**: If the function throws an exception or an `Either::left` is returned then nothing will be flushed to the database.
 
 ### Transactions
 
 ```php
-$manager->transaction(function($manager, $flush) {
+$manager->transaction(function($manager, $flush): Either {
     $progress = 0;
     $repository = $manager->repository(User::class);
 
@@ -172,6 +161,8 @@ $manager->transaction(function($manager, $flush) {
             $flush();
         }
     }
+
+    return Either::right(null);
 });
 ```
 
@@ -182,21 +173,21 @@ $manager->transaction(function($manager, $flush) {
 Sometimes you may want to manipulate an array so it can be used with php functions such as `json_encode`.
 
 ```php
-use Innmind\Doctrine\Sequence;
-use function Innmind\Doctrine\unwrap;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-/** @var Sequence<array{username: string, registerIndex: int}> */
+/** @var list<array{username: string, registerIndex: int}> */
 $data = $manager
     ->repository(User::class)
     ->all()
-    ->sort('registerIndex', 'asc')
+    ->sort('registerIndex', Sort::asc)
+    ->fetch()
     ->map(static fn(User $user): array => [
         'username' => $user->username(),
         'registerIndex' => $user->registerIndex(),
-    ]);
+    ])
+    ->toList();
 
-new JsonResponse(unwrap($data));
+new JsonResponse($data);
 ```
 
 ### Filtering on relations
