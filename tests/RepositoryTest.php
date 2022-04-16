@@ -279,7 +279,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Strings::any(),
-                User::any()
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(
@@ -302,7 +302,7 @@ class RepositoryTest extends TestCase
         $this
             ->forAll(
                 Set\Strings::any(),
-                User::any()
+                User::any(),
             )
             ->then(function($entityClass, $entity) {
                 $repository = new Repository(

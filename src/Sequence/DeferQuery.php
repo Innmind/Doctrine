@@ -33,7 +33,7 @@ final class DeferQuery implements Sequence
         QueryBuilder $queryBuilder,
         array $sort = [],
         int $toDrop = 0,
-        ?int $toTake = null
+        ?int $toTake = null,
     ) {
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->queryBuilder = $queryBuilder;
@@ -230,7 +230,7 @@ final class DeferQuery implements Sequence
             QueryBuilder $queryBuilder,
             array $sort,
             int $toDrop,
-            ?int $toTake
+            ?int $toTake,
         ): \Generator {
             /**
              * @var string $property

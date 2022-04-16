@@ -747,7 +747,7 @@ class ToQueryBuilderTest extends TestCase
                 $right1Property,
                 $right1Value,
                 $right2Property,
-                $right2Value
+                $right2Value,
             ) {
                 $left = $this->createMock(Comparator::class);
                 $left

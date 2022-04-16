@@ -32,7 +32,7 @@ final class Repository
     public function __construct(
         EntityManagerInterface $doctrine,
         string $entityClass,
-        \Closure $allowMutation = null
+        \Closure $allowMutation = null,
     ) {
         $this->doctrine = $doctrine;
         $this->entityClass = $entityClass;

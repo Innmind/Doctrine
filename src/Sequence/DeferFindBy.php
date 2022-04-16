@@ -38,7 +38,7 @@ final class DeferFindBy implements Sequence
         Specification $specification,
         array $sort = [],
         int $toDrop = 0,
-        ?int $toTake = null
+        ?int $toTake = null,
     ) {
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->repository = $repository;
@@ -240,7 +240,7 @@ final class DeferFindBy implements Sequence
             Specification $specification,
             array $sort,
             int $toDrop,
-            ?int $toTake
+            ?int $toTake,
         ): \Generator {
             /**
              * @psalm-suppress MixedArgumentTypeCoercion

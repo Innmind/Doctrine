@@ -53,7 +53,7 @@ final class ToQueryBuilder
 
     public function __construct(
         EntityRepository $repository,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
     ) {
         /** @psalm-suppress ImpurePropertyAssignment */
         $this->repository = $repository;
@@ -122,7 +122,7 @@ final class ToQueryBuilder
     private function visit(
         Specification $specification,
         QueryBuilder $qb,
-        callable $alias
+        callable $alias,
     ) {
         if ($specification instanceof Child) {
             return $this->child($specification, $qb);
@@ -169,7 +169,7 @@ final class ToQueryBuilder
     private function expression(
         Comparator $specification,
         QueryBuilder $qb,
-        callable $alias
+        callable $alias,
     ) {
         $property = "entity.{$specification->property()}";
         $relation = null;
@@ -297,7 +297,7 @@ final class ToQueryBuilder
     private function decodeJson(
         string $property,
         string $field,
-        ?string $relation
+        ?string $relation,
     ): string {
         if ($this->type($field, $relation) instanceof JsonType) {
             return "json_value($property, '$')";
@@ -361,7 +361,7 @@ final class ToQueryBuilder
     private function matchJson(
         QueryBuilder $qb,
         string $property,
-        JsonArray $specification
+        JsonArray $specification,
     ) {
         // the sql json_contains function expects the value to be searched to be
         // json encoded otherwise the value will never be found
