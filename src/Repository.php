@@ -93,46 +93,23 @@ final class Repository
         $this->doctrine->remove($entity);
     }
 
-    public function matching(Specification $specification): Sequence
+    /**
+     * @return Matching<T>
+     */
+    public function matching(Specification $specification): Matching
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($repository instanceof EntityRepository) {
-            return new Sequence\DeferQuery(
-                (new ToQueryBuilder($repository, $this->doctrine))($specification),
-            );
-        }
-
-        /** @psalm-suppress MixedArgument */
-        return new Sequence\DeferFindBy(
-            $repository,
-            $specification,
-        );
+        return Matching::of($this->doctrine, $repository, $specification);
     }
 
     /**
-     * @return Sequence<T>
+     * @return Matching<T>
      */
-    public function all(): Sequence
+    public function all(): Matching
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
 
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
-        if ($repository instanceof EntityRepository) {
-            /** @var Sequence<T> */
-            return new Sequence\DeferQuery(
-                $repository->createQueryBuilder('entity'),
-            );
-        }
-
-        /**
-         * @psalm-suppress MixedArgument
-         * @psalm-suppress MixedMethodCall
-         * @var Sequence<T>
-         */
-        return Sequence\Concrete::of(
-            ...$repository->findAll(),
-        );
+        return Matching::all($this->doctrine, $repository);
     }
 }

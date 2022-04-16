@@ -6,6 +6,7 @@ namespace Tests\Innmind\Doctrine;
 use Innmind\Doctrine\{
     Repository,
     Sequence,
+    Matching,
     Exception\EntityNotFound,
     Exception\MutationOutsideOfContext,
 };
@@ -188,6 +189,7 @@ class RepositoryTest extends TestCase
                     $entities,
                     $repository
                         ->all()
+                        ->fetch()
                         ->reduce(
                             [],
                             static function($entities, $entity) {
@@ -224,7 +226,7 @@ class RepositoryTest extends TestCase
 
                 $this->assertInstanceOf(
                     Sequence\DeferQuery::class,
-                    $repository->all(),
+                    $repository->all()->fetch(),
                 );
             });
     }
@@ -247,7 +249,7 @@ class RepositoryTest extends TestCase
                     ->willReturn($this->createMock(ObjectRepository::class));
 
                 $this->assertInstanceOf(
-                    Sequence\DeferFindBy::class,
+                    Matching::class,
                     $repository->matching(Username::of($username)),
                 );
             });
@@ -268,7 +270,7 @@ class RepositoryTest extends TestCase
                 );
 
                 $this->assertInstanceOf(
-                    Sequence\DeferQuery::class,
+                    Matching::class,
                     $repository->matching(Username::of($username)),
                 );
             });
