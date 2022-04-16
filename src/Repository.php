@@ -23,6 +23,7 @@ final class Repository
     private \Closure $allowMutation;
 
     /**
+     * @internal
      * @param class-string<T> $entityClass
      * @param \Closure(): bool $allowMutation
      */
