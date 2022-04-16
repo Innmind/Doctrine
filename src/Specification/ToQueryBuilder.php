@@ -188,80 +188,52 @@ final class ToQueryBuilder
 
         $property = $this->decodeJson($property, $field, $relation);
 
-        switch ($specification->sign()) {
-            case Sign::equality:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->eq($property, $placeholder);
-
-            case Sign::inequality:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->neq($property, $placeholder);
-
-            case Sign::lessThan:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->lt($property, $placeholder);
-
-            case Sign::moreThan:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->gt($property, $placeholder);
-
-            case Sign::lessThanOrEqual:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->lte($property, $placeholder);
-
-            case Sign::moreThanOrEqual:
-                $placeholder = $this->placeholder($specification->value(), $qb);
-
-                return $qb->expr()->gte($property, $placeholder);
-
-            case Sign::isNull:
-                return $qb->expr()->isNull($property);
-
-            case Sign::isNotNull:
-                return $qb->expr()->isNotNull($property);
-
-            case Sign::startsWith:
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    $specification->value().'%',
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::endsWith:
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    '%'.$specification->value(),
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::contains:
-                /** @psalm-suppress MixedOperand */
-                $placeholder = $this->placeholder(
-                    '%'.$specification->value().'%',
-                    $qb,
-                );
-
-                return $qb->expr()->like($property, $placeholder);
-
-            case Sign::in:
-                $placeholder = $this->placeholder(
-                    $specification->value(),
-                    $qb,
-                );
-
-                return $qb->expr()->in($property, $placeholder);
-        }
-
-        throw new ComparisonNotSupported($specification->sign()->name);
+        /** @psalm-suppress MixedOperand Due to the implicit string cast in the LIKE */
+        return match ($specification->sign()) {
+            Sign::equality => $qb->expr()->eq(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::inequality => $qb->expr()->neq(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::lessThan => $qb->expr()->lt(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::moreThan => $qb->expr()->gt(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::lessThanOrEqual => $qb->expr()->lte(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::moreThanOrEqual => $qb->expr()->gte(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            Sign::isNull => $qb->expr()->isNull($property),
+            Sign::isNotNull => $qb->expr()->isNotNull($property),
+            Sign::startsWith => $qb->expr()->like(
+                $property,
+                $this->placeholder($specification->value().'%', $qb),
+            ),
+            Sign::endsWith => $qb->expr()->like(
+                $property,
+                $this->placeholder('%'.$specification->value(), $qb),
+            ),
+            Sign::contains => $qb->expr()->like(
+                $property,
+                $this->placeholder('%'.$specification->value().'%', $qb),
+            ),
+            Sign::in => $qb->expr()->in(
+                $property,
+                $this->placeholder($specification->value(), $qb),
+            ),
+            default => throw new ComparisonNotSupported($specification->sign()->name),
+        };
     }
 
     /**
