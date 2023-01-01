@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0 - 2023-01-01
+
+### Added
+
+- `Innmind\Doctrine\Id::of()` named constructor
+
 ## 2.0.0 - 2022-04-16
 
 ### Added
