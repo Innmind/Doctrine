@@ -137,7 +137,7 @@ final class Matching
     public function fetch(): Sequence
     {
         if ($this->repository instanceof EntityRepository) {
-            /** @psalm-suppress MixedArgumentTypeCoercion */
+            /** @psalm-suppress InvalidArgument */
             return $this->fetchQueryBuilder($this->repository);
         }
 
