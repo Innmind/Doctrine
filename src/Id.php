@@ -34,6 +34,20 @@ final class Id
 
     /**
      * @template A
+     * @psalm-pure
+     *
+     * @param class-string<A> $class
+     *
+     * @return self<A>
+     */
+    public static function of(string $class, string $value): self
+    {
+        /** @var self<A> */
+        return new self($value);
+    }
+
+    /**
+     * @template A
      *
      * @param class-string<A> $class
      *
