@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.20 - 2023-02-17
+
+### Added
+
+- `Innmind\Doctrine\Repository::count()`
+
 ## 2.1.0 - 2023-01-01
 
 ### Added

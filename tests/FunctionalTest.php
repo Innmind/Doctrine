@@ -241,6 +241,31 @@ class FunctionalTest extends TestCase
         );
     }
 
+    public function testCount()
+    {
+        $entityManager = require __DIR__.'/../config/entity-manager.php';
+        $this->reset($entityManager);
+        $manager = Manager::of($entityManager);
+        $repository = $manager->repository(User::class);
+        $this
+            ->forAll(FUser::any())
+            ->take(100)
+            ->then(static function($user) use ($manager, $repository) {
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
+            });
+
+        $expected = $repository
+            ->all()
+            ->fetch()
+            ->filter(static fn($user) => $user->username() === 'alice')
+            ->size();
+
+        $alices = $repository->count(Username::of('alice'));
+
+        $this->assertGreaterThanOrEqual(0, $alices);
+        $this->assertSame($expected, $alices);
+    }
+
     private function reset($entityManager): void
     {
         $entityManager

@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine;
 
-use Innmind\Doctrine\Exception\MutationOutsideOfContext;
+use Innmind\Doctrine\{
+    Specification\ToQueryBuilder,
+    Exception\MutationOutsideOfContext,
+};
 use Innmind\Specification\Specification;
 use Innmind\Immutable\Maybe;
 use Doctrine\ORM\{
@@ -104,5 +107,24 @@ final class Repository
         $repository = $this->doctrine->getRepository($this->entityClass);
 
         return Matching::all($this->doctrine, $repository);
+    }
+
+    /**
+     * @return 0|positive-int
+     */
+    public function count(Specification $specification): int
+    {
+        $repository = $this->doctrine->getRepository($this->entityClass);
+
+        /** @psalm-suppress RedundantCondition */
+        if ($repository instanceof EntityRepository) {
+            $queryBuilder = (new ToQueryBuilder($repository, $this->doctrine))($specification);
+            $queryBuilder->select('count(entity)');
+
+            /** @var 0|positive-int */
+            return $queryBuilder->getQuery()->getSingleScalarResult();
+        }
+
+        return $this->matching($specification)->fetch()->size();
     }
 }
