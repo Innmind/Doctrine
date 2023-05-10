@@ -85,9 +85,12 @@ final class Matching
 
     /**
      * @param positive-int $size
+     *
+     * @return self<T>
      */
     public function drop(int $size): self
     {
+        /** @var self<T> */
         return new self(
             $this->manager,
             $this->repository,
@@ -100,9 +103,12 @@ final class Matching
 
     /**
      * @param positive-int $size
+     *
+     * @return self<T>
      */
     public function take(int $size): self
     {
+        /** @var self<T> */
         return new self(
             $this->manager,
             $this->repository,
@@ -115,9 +121,12 @@ final class Matching
 
     /**
      * @param non-empty-string $property
+     *
+     * @return self<T>
      */
     public function sort(string $property, Sort $direction): self
     {
+        /** @var self<T> */
         return new self(
             $this->manager,
             $this->repository,

@@ -10,6 +10,12 @@
 
 - `Innmind\Doctrine\Repository::count()` the specification argument is now optional (it will count all entities)
 
+## 2.2.1 - 2023-02-21
+
+### Fixed
+
+- `Innmind\Doctrine\Matching::drop()`, `take()` and `sort()` no longer lose the type of object
+
 ## 2.2.0 - 2023-02-17
 
 ### Added
