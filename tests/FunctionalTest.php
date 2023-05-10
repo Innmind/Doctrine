@@ -247,6 +247,7 @@ class FunctionalTest extends TestCase
         $this->reset($entityManager);
         $manager = Manager::of($entityManager);
         $repository = $manager->repository(User::class);
+        $this->assertSame(0, $repository->count());
         $this
             ->forAll(FUser::any())
             ->take(100)
@@ -264,6 +265,7 @@ class FunctionalTest extends TestCase
 
         $this->assertGreaterThanOrEqual(0, $alices);
         $this->assertSame($expected, $alices);
+        $this->assertSame(100, $repository->count());
     }
 
     private function reset($entityManager): void

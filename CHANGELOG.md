@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.0 - 2023-05-10
+
+### Added
+
+- `Innmind\Doctrine\Matching::map()`
+
+### Changed
+
+- `Innmind\Doctrine\Repository::count()` the specification argument is now optional (it will count all entities)
+
 ## 2.2.1 - 2023-02-21
 
 ### Fixed
