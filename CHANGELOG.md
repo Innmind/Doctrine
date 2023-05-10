@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Doctrine\Matching::map()`
+
 ### Changed
 
 - `Innmind\Doctrine\Repository::count()` the specification argument is now optional (it will count all entities)

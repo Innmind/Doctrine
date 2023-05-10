@@ -132,6 +132,17 @@ final class Matching
     }
 
     /**
+     * @param callable(self<T>): self<T> $map
+     *
+     * @return self<T>
+     */
+    public function map(callable $map): self
+    {
+        /** @psalm-suppress ImpureFunctionCall */
+        return $map($this);
+    }
+
+    /**
      * @return Sequence<T>
      */
     public function fetch(): Sequence
