@@ -264,6 +264,7 @@ class FunctionalTest extends TestCase
 
         $this->assertGreaterThanOrEqual(0, $alices);
         $this->assertSame($expected, $alices);
+        $this->assertSame(100, $repository->count());
     }
 
     private function reset($entityManager): void

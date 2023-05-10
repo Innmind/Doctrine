@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `Innmind\Doctrine\Repository::count()` the specification argument is now optional (it will count all entities)
+
 ## 2.2.0 - 2023-02-17
 
 ### Added

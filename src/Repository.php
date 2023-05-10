@@ -112,9 +112,14 @@ final class Repository
     /**
      * @return 0|positive-int
      */
-    public function count(Specification $specification): int
+    public function count(Specification $specification = null): int
     {
         $repository = $this->doctrine->getRepository($this->entityClass);
+
+        if (\is_null($specification)) {
+            /** @var 0|positive-int */
+            return $repository->count([]);
+        }
 
         /** @psalm-suppress RedundantCondition */
         if ($repository instanceof EntityRepository) {
