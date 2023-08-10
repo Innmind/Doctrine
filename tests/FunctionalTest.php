@@ -17,6 +17,7 @@ use Fixtures\Innmind\Doctrine\User as FUser;
 use Example\Innmind\Doctrine\{
     User,
     Username,
+    Address,
 };
 
 class FunctionalTest extends TestCase
@@ -266,6 +267,48 @@ class FunctionalTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $alices);
         $this->assertSame($expected, $alices);
         $this->assertSame(100, $repository->count());
+    }
+
+    public function testDoesntLoadEverythingInMemoryWhenLazyFetching()
+    {
+        $entityManager = require __DIR__.'/../config/entity-manager.php';
+        $this->reset($entityManager);
+        $manager = Manager::of($entityManager);
+        $repository = $manager->repository(User::class);
+        $this
+            ->forAll(FUser::any(null, Set\Sequence::of(
+                Set\Composite::immutable(
+                    static fn(...$args) => new Address(...$args),
+                    Set\Elements::of(true, false),
+                    Set\Strings::madeOf(Set\Chars::alphanumerical()),
+                ),
+                Set\Integers::between(0, 2),
+            )))
+            ->take(10_000)
+            ->then(static function($user) use ($manager, $repository) {
+                $manager->mutate(static fn() => Either::right($repository->add($user)));
+                $manager->clear();
+            });
+
+        $memory = \memory_get_peak_usage();
+        $count = $repository
+            ->all()
+            ->lazy()
+            ->fetch()
+            ->reduce(
+                0,
+                static function(int $count, $user) use ($manager) {
+                    $_ = $user->addresses(); // to make sure sub entities are loadable
+                    $manager->clear();
+
+                    return $count + 1;
+                },
+            );
+
+        $this->assertSame(10_000, $count);
+        // Without the lazy loading combined with the clear of the manager it
+        // takes around 45Mo
+        $this->assertLessThanOrEqual(7_000_000, \memory_get_peak_usage() - $memory);
     }
 
     private function reset($entityManager): void

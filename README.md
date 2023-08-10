@@ -209,3 +209,25 @@ $users = $manager
 The `Child` specification use the property `children.username` thus specifying the username of a user's children.
 
 **Note**: for now only one level relationship is allowed in a specification property.
+
+### Lazy loading collections
+
+In certain cases the amount of entities you will fetch won't fit in memory. To still work with this king of scenario you need to use a lazy `Sequence` and perform periodic clears.
+
+```php
+$_ = $manager
+    ->repository(User::class)
+    ->all()
+    ->lazy() // instruct to load one entity at a time
+    ->fetch()
+    ->foreach(function($user) use ($manager) {
+        doStuff($user);
+        // this clear is important to make doctrine forget about the loaded
+        // entities and will consequently free memory
+        $manager->clear();
+    });
+```
+
+**Note**: this feature won't work however if you use bi-directional relationships in your entities, for some reason doctrine won't free memory.
+
+**Note 2**: you should only use this feature when reading data. Using this in a write context may have unexpected side effects!

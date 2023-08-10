@@ -13,7 +13,7 @@ final class Address
 
     public function __construct(bool $main, string $address)
     {
-        $this->id = Id::new();
+        $this->id = Id::new(self::class);
         $this->main = $main;
         $this->address = $address;
     }
