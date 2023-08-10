@@ -29,6 +29,7 @@ final class Matching
     private array $sort;
     private int $toDrop;
     private ?int $toTake;
+    private bool $lazy;
 
     /**
      * @param EntityRepository<T>|ObjectRepository<T> $repository
@@ -41,6 +42,7 @@ final class Matching
         array $sort,
         int $toDrop,
         ?int $toTake,
+        bool $lazy,
     ) {
         $this->manager = $manager;
         $this->repository = $repository;
@@ -48,6 +50,7 @@ final class Matching
         $this->sort = $sort;
         $this->toDrop = $toDrop;
         $this->toTake = $toTake;
+        $this->lazy = $lazy;
     }
 
     /**
@@ -64,7 +67,7 @@ final class Matching
         EntityRepository|ObjectRepository $repository,
         Specification $specification,
     ): self {
-        return new self($manager, $repository, $specification, [], 0, null);
+        return new self($manager, $repository, $specification, [], 0, null, false);
     }
 
     /**
@@ -80,7 +83,7 @@ final class Matching
         EntityManagerInterface $manager,
         EntityRepository|ObjectRepository $repository,
     ): self {
-        return new self($manager, $repository, null, [], 0, null);
+        return new self($manager, $repository, null, [], 0, null, false);
     }
 
     /**
@@ -98,6 +101,7 @@ final class Matching
             $this->sort,
             $this->toDrop + $size,
             $this->toTake,
+            $this->lazy,
         );
     }
 
@@ -116,6 +120,7 @@ final class Matching
             $this->sort,
             $this->toDrop,
             $size,
+            $this->lazy,
         );
     }
 
@@ -137,6 +142,7 @@ final class Matching
             ),
             $this->toDrop,
             $this->toTake,
+            $this->lazy,
         );
     }
 
@@ -149,6 +155,23 @@ final class Matching
     {
         /** @psalm-suppress ImpureFunctionCall */
         return $map($this);
+    }
+
+    /**
+     * @return self<T>
+     */
+    public function lazy(): self
+    {
+        /** @var self<T> */
+        return new self(
+            $this->manager,
+            $this->repository,
+            $this->specification,
+            $this->sort,
+            $this->toDrop,
+            $this->toTake,
+            true,
+        );
     }
 
     /**
@@ -171,15 +194,21 @@ final class Matching
      */
     private function fetchQueryBuilder(EntityRepository $repository): Sequence
     {
-        /** @psalm-suppress ImpureFunctionCall */
-        return Sequence::defer((static function(
-            EntityRepository $repository,
-            EntityManagerInterface $manager,
-            ?Specification $specification,
-            array $sort,
-            int $toDrop,
-            ?int $toTake,
-        ) {
+        $repository = $repository;
+        $manager = $this->manager;
+        $specification = $this->specification;
+        $sort = $this->sort;
+        $toDrop = $this->toDrop;
+        $toTake = $this->toTake;
+
+        $fetch = static function() use (
+            $repository,
+            $manager,
+            $specification,
+            $sort,
+            $toDrop,
+            $toTake,
+        ): \Generator {
             if (\is_null($specification)) {
                 $queryBuilder = $repository->createQueryBuilder('entity');
             } else {
@@ -212,19 +241,18 @@ final class Matching
              * @psalm-suppress ImpureMethodCall
              * @var list<T>
              */
-            $entities = $queryBuilder->getQuery()->getResult();
+            $entities = $queryBuilder->getQuery()->toIterable();
 
             foreach ($entities as $entity) {
                 yield $entity;
             }
-        })(
-            $repository,
-            $this->manager,
-            $this->specification,
-            $this->sort,
-            $this->toDrop,
-            $this->toTake,
-        ));
+        };
+
+        /** @psalm-suppress ImpureFunctionCall */
+        return match ($this->lazy) {
+            true => Sequence::lazy($fetch),
+            false => Sequence::defer($fetch()),
+        };
     }
 
     /**

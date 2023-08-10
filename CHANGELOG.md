@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0 - 2023-08-10
+
+### Added
+
+- `Innmind\Doctrine\Matching::lazy()`
+
 ## 2.3.0 - 2023-05-10
 
 ### Added

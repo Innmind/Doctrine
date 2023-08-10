@@ -233,12 +233,49 @@ class RepositoryTest extends TestCase
                     ->willReturn($query = $this->createMock(AbstractQuery::class));
                 $query
                     ->expects($this->once())
-                    ->method('getResult')
-                    ->willReturn([]);
+                    ->method('toIterable')
+                    ->willReturn($entities);
 
                 $this->assertSame(
-                    [],
+                    $entities,
                     $repository->all()->fetch()->toList(),
+                );
+            });
+    }
+
+    public function testLazyAll()
+    {
+        $this
+            ->forAll(
+                Set\Unicode::strings(),
+                User::list(),
+            )
+            ->then(function($entityClass, $entities) {
+                $repository = new Repository(
+                    $doctrine = $this->createMock(EntityManagerInterface::class),
+                    $entityClass,
+                );
+                $doctrine
+                    ->expects($this->once())
+                    ->method('getRepository')
+                    ->willReturn($innerRepository = $this->createMock(EntityRepository::class));
+                $innerRepository
+                    ->expects($this->once())
+                    ->method('createQueryBuilder')
+                    ->with('entity')
+                    ->willReturn($qb = $this->createMock(QueryBuilder::class));
+                $qb
+                    ->expects($this->once())
+                    ->method('getQuery')
+                    ->willReturn($query = $this->createMock(AbstractQuery::class));
+                $query
+                    ->expects($this->once())
+                    ->method('toIterable')
+                    ->willReturn($entities);
+
+                $this->assertSame(
+                    $entities,
+                    $repository->all()->lazy()->fetch()->toList(),
                 );
             });
     }

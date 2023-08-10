@@ -58,4 +58,9 @@ final class User
 
         return false;
     }
+
+    public function addresses(): array
+    {
+        return $this->addresses->getValues();
+    }
 }

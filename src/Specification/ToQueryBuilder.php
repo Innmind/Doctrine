@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Doctrine\Specification;
 
-use Innmind\Doctrine\Exception\{
-    ComparisonNotSupported,
-    SpecificationNotSuported,
-};
+use Innmind\Doctrine\Exception\SpecificationNotSuported;
 use Innmind\Specification\{
     Specification,
     Comparator,
@@ -232,7 +229,6 @@ final class ToQueryBuilder
                 $property,
                 $this->placeholder($specification->value(), $qb),
             ),
-            default => throw new ComparisonNotSupported($specification->sign()->name),
         };
     }
 

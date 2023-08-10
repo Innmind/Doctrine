@@ -121,6 +121,16 @@ final class Manager
         }
     }
 
+    /**
+     * This makes the manager forget about all known objects.
+     *
+     * Only use this method to free memory when using lazy Sequences
+     */
+    public function clear(): void
+    {
+        $this->entityManager->clear();
+    }
+
     private function enterMutation(): void
     {
         if ($this->mutating) {
