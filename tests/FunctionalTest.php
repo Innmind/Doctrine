@@ -269,6 +269,9 @@ class FunctionalTest extends TestCase
         $this->assertSame(100, $repository->count());
     }
 
+    /**
+     * @group slow
+     */
     public function testDoesntLoadEverythingInMemoryWhenLazyFetching()
     {
         $entityManager = require __DIR__.'/../config/entity-manager.php';

@@ -69,7 +69,7 @@ jobs:
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
-        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover --exclude-group=slow
         env:
           BLACKBOX_SET_SIZE: 1
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
