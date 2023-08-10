@@ -234,10 +234,10 @@ class RepositoryTest extends TestCase
                 $query
                     ->expects($this->once())
                     ->method('toIterable')
-                    ->willReturn([]);
+                    ->willReturn($entities);
 
                 $this->assertSame(
-                    [],
+                    $entities,
                     $repository->all()->fetch()->toList(),
                 );
             });
