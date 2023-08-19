@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.1 - 2023-08-19
+
+### Fixed
+
+- Fix loading non lazy sequences when using a fetch join
+
 ## 2.4.0 - 2023-08-10
 
 ### Added

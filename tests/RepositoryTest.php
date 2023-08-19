@@ -233,7 +233,7 @@ class RepositoryTest extends TestCase
                     ->willReturn($query = $this->createMock(AbstractQuery::class));
                 $query
                     ->expects($this->once())
-                    ->method('toIterable')
+                    ->method('getResult')
                     ->willReturn($entities);
 
                 $this->assertSame(

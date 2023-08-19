@@ -200,6 +200,7 @@ final class Matching
         $sort = $this->sort;
         $toDrop = $this->toDrop;
         $toTake = $this->toTake;
+        $lazy = $this->lazy;
 
         $fetch = static function() use (
             $repository,
@@ -208,6 +209,7 @@ final class Matching
             $sort,
             $toDrop,
             $toTake,
+            $lazy,
         ): \Generator {
             if (\is_null($specification)) {
                 $queryBuilder = $repository->createQueryBuilder('entity');
@@ -237,11 +239,16 @@ final class Matching
                 $queryBuilder->setMaxResults($toTake);
             }
 
+            $query = $queryBuilder->getQuery();
+
             /**
              * @psalm-suppress ImpureMethodCall
-             * @var list<T>
+             * @var iterable<T>
              */
-            $entities = $queryBuilder->getQuery()->toIterable();
+            $entities = match ($lazy) {
+                true => $query->toIterable(),
+                false => $query->getResult(),
+            };
 
             foreach ($entities as $entity) {
                 yield $entity;
