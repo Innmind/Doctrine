@@ -285,8 +285,7 @@ class FunctionalTest extends TestCase
                     Set\Elements::of(true, false),
                     Set\Strings::madeOf(Set\Chars::alphanumerical()),
                 ),
-                Set\Integers::between(0, 2),
-            )))
+            )->between(0, 2)))
             ->take(10_000)
             ->then(static function($user) use ($manager, $repository) {
                 $manager->mutate(static fn() => Either::right($repository->add($user)));

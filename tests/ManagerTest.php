@@ -128,7 +128,7 @@ class ManagerTest extends TestCase
     public function testCloseTheEntityManagerWhenMutationReturnsAnError()
     {
         $this
-            ->forAll(Set\AnyType::any())
+            ->forAll(Set\Type::any())
             ->then(function($return) {
                 $manager = Manager::of(
                     $em = $this->createMock(EntityManagerInterface::class),
