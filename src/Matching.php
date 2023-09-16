@@ -284,7 +284,7 @@ final class Matching
             }
 
             /**
-             * @psalm-suppress ArgumentTypeCoercion
+             * @psalm-suppress MixedArgumentTypeCoercion
              * @var iterable<T>
              */
             $entities = $repository->findBy(
