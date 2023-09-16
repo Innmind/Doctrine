@@ -16,7 +16,7 @@
     },
     "require": {
         "php": "~8.1",
-        "innmind/immutable": "~4.0",
+        "innmind/immutable": "~4.0|~5.0",
         "doctrine/orm": "^2.7",
         "ramsey/uuid": "^4.0",
         "innmind/specification": "~3.0"
