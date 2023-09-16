@@ -170,13 +170,12 @@ class ToArrayTest extends TestCase
             Set\Sequence::of(
                 Set\Decorate::immutable(
                     static fn(int $ord) => \chr($ord),
-                    new Set\Either(
+                    Set\Either::any(
                         Set\Integers::between(65, 90), // A-Z
                         Set\Integers::between(97, 122), // a-z
                     ),
                 ),
-                Set\Integers::between(1, 50),
-            ),
+            )->between(1, 50),
         );
     }
 }

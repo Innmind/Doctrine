@@ -36,7 +36,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -79,7 +79,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -122,7 +122,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -165,7 +165,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -208,7 +208,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -251,7 +251,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -294,7 +294,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -337,7 +337,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -380,7 +380,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -423,7 +423,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -466,7 +466,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -509,11 +509,10 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Sequence::of(
                     Set\Unicode::strings(),
-                    Set\Integers::between(0, 10),
-                ),
+                )->between(0, 10),
             )
             ->then(function($property, $values) {
                 $specification = $this->createMock(Comparator::class);
@@ -555,7 +554,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -602,9 +601,9 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($leftProperty, $leftValue, $rightProperty, $rightValue) {
@@ -668,9 +667,9 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($leftProperty, $leftValue, $rightProperty, $rightValue) {
@@ -734,11 +733,11 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function(
@@ -830,8 +829,8 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
-                $this->name(),
+                $this->names(),
+                $this->names(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
             )
@@ -883,10 +882,10 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
-                $this->name(),
+                $this->names(),
+                $this->names(),
                 Set\Unicode::strings(),
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
             )
@@ -959,7 +958,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
@@ -1002,7 +1001,7 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
+                $this->names(),
                 Set\Strings::madeOf(Set\Chars::alphanumerical()),
             )
             ->then(function($property, $value) {
@@ -1036,9 +1035,9 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
-                $this->name(),
-                $this->name(),
+                $this->names(),
+                $this->names(),
+                $this->names(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
@@ -1105,10 +1104,10 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
-                $this->name(),
-                $this->name(),
-                $this->name(),
+                $this->names(),
+                $this->names(),
+                $this->names(),
+                $this->names(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
@@ -1192,10 +1191,10 @@ class ToQueryBuilderTest extends TestCase
     {
         $this
             ->forAll(
-                $this->name(),
-                $this->name(),
-                $this->name(),
-                $this->name(),
+                $this->names(),
+                $this->names(),
+                $this->names(),
+                $this->names(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
                 Set\Unicode::strings(),
@@ -1276,14 +1275,13 @@ class ToQueryBuilderTest extends TestCase
             });
     }
 
-    private function name(): Set
+    private function names(): Set
     {
         return Set\Decorate::immutable(
             static fn(array $letters): string => \implode('', $letters),
             Set\Sequence::of(
                 Set\Elements::of(...\range('a', 'z'), ...\range('A', 'Z')),
-                Set\Integers::between(1, 10),
-            ),
+            )->between(1, 10),
         );
     }
 }

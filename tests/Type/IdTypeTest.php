@@ -61,7 +61,7 @@ class IdTypeTest extends TestCase
     {
         $this
             ->forAll(
-                new Set\Either( // here to use different types
+                Set\Either::any( // here to use different types
                     Set\Uuid::any(),
                     Set\Integers::above(0),
                 ),
@@ -109,7 +109,7 @@ class IdTypeTest extends TestCase
     {
         $this
             ->forAll(
-                new Set\Either( // here to use different types
+                Set\Either::any( // here to use different types
                     Set\Sequence::of(
                         Set\Chars::any(),
                     ),

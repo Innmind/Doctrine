@@ -38,7 +38,7 @@ final class User
     public static function list(int $min = 0): Set
     {
         return Set\Sequence::of(
-            new Set\Randomize(self::any()),
+            Set\Randomize::of(self::any()),
             Set\Integers::between($min, 10),
         );
     }
