@@ -66,18 +66,18 @@ return static function() {
 
             $memory = \memory_get_peak_usage();
             // Without the lazy loading combined with the clear of the manager it
-            // takes around 45Mo
+            // takes between 20Mo and 36Mo, when lazy it ranges between 6Mo and 16Mo
             $assert
                 ->memory(static function() use ($assert, $repository, $manager) {
                     $count = $repository
                         ->all()
-                        // ->lazy()
+                        ->lazy()
                         ->fetch()
                         ->reduce(
                             0,
                             static function(int $count, $user) use ($manager) {
                                 $_ = $user->addresses(); // to make sure sub entities are loadable
-                                // $manager->clear();
+                                $manager->clear();
 
                                 return $count + 1;
                             },
@@ -86,7 +86,7 @@ return static function() {
                     $assert->same(10_000, $count);
                 })
                 ->inLessThan()
-                ->megaBytes(7);
+                ->megaBytes(18);
         },
     );
 };
