@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     services:
       mariadb:
@@ -29,6 +30,8 @@ jobs:
           coverage: none
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
         env:
@@ -44,6 +47,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'Coverage'
     services:
       mariadb:
@@ -64,6 +68,8 @@ jobs:
           coverage: xdebug
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
         env:
