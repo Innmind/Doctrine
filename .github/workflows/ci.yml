@@ -112,7 +112,7 @@ jobs:
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: BlackBox
-        run: php blackbox.php
+        run: php blackbox.php ci
         env:
           ENABLE_COVERAGE: 'true'
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}

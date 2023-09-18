@@ -7,6 +7,7 @@ use Innmind\Immutable\Either;
 use Innmind\BlackBox\{
     Application,
     Set,
+    Tag,
     Runner\IO\Collect,
 };
 use Fixtures\Innmind\Doctrine\User as FUser;
@@ -88,5 +89,5 @@ return static function() {
                 ->inLessThan()
                 ->megaBytes(18);
         },
-    );
+    )->tag(Tag::local);
 };
