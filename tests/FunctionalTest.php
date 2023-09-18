@@ -353,6 +353,8 @@ class FunctionalTest extends TestCase
                         ->fetch()
                         ->size(),
                 );
+
+                $this->close($entityManager);
             });
     }
 
@@ -395,6 +397,8 @@ class FunctionalTest extends TestCase
                         ->fetch()
                         ->size(),
                 );
+
+                $this->close($entityManager);
             });
     }
 
@@ -438,6 +442,8 @@ class FunctionalTest extends TestCase
                         ->fetch()
                         ->size(),
                 );
+
+                $this->close($entityManager);
             });
     }
 
@@ -458,5 +464,12 @@ class FunctionalTest extends TestCase
         $entityManager
             ->getConnection()
             ->executeUpdate('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function close($entityManager): void
+    {
+        $entityManager
+            ->getConnection()
+            ->close();
     }
 }
