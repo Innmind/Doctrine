@@ -322,11 +322,11 @@ class FunctionalTest extends TestCase
                 Set\MutuallyExclusive::of(
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
                 ),
-                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
             )
-            ->then(function($id, $prefixes, $username) {
-                [$prefix, $random] = $prefixes;
+            ->then(function($id, $strings) {
+                [$prefix, $random, $username] = $strings;
 
                 $entityManager = require __DIR__.'/../config/entity-manager.php';
                 $this->reset($entityManager);
@@ -364,11 +364,11 @@ class FunctionalTest extends TestCase
                 Set\MutuallyExclusive::of(
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
                 ),
-                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
             )
-            ->then(function($id, $suffixes, $username) {
-                [$suffix, $random] = $suffixes;
+            ->then(function($id, $strings) {
+                [$suffix, $random, $username] = $strings;
 
                 $entityManager = require __DIR__.'/../config/entity-manager.php';
                 $this->reset($entityManager);
@@ -406,15 +406,12 @@ class FunctionalTest extends TestCase
                 Set\MutuallyExclusive::of(
                     Set\Strings::madeOf(Set\Chars::ascii())->between(0, 50),
                     Set\Strings::madeOf(Set\Chars::ascii())->between(0, 50),
-                ),
-                Set\MutuallyExclusive::of(
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 155),
                     Set\Strings::madeOf(Set\Chars::ascii())->between(1, 155),
                 ),
             )
-            ->then(function($id, $edges, $usernames) {
-                [$prefix, $suffix] = $edges;
-                [$username, $random] = $usernames;
+            ->then(function($id, $strings) {
+                [$prefix, $suffix, $username, $random] = $strings;
 
                 $entityManager = require __DIR__.'/../config/entity-manager.php';
                 $this->reset($entityManager);
