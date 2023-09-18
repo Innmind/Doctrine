@@ -71,13 +71,13 @@ return static function() {
                 ->memory(static function() use ($assert, $repository, $manager) {
                     $count = $repository
                         ->all()
-                        ->lazy()
+                        // ->lazy()
                         ->fetch()
                         ->reduce(
                             0,
                             static function(int $count, $user) use ($manager) {
                                 $_ = $user->addresses(); // to make sure sub entities are loadable
-                                $manager->clear();
+                                // $manager->clear();
 
                                 return $count + 1;
                             },
