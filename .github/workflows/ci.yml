@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     services:
       mariadb:
@@ -29,6 +30,8 @@ jobs:
           coverage: none
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
         env:
@@ -38,12 +41,91 @@ jobs:
         env:
           BLACKBOX_DETAILED_PROPERTIES: 1
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+  blackbox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
+    name: 'BlackBox'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+  blackbox_coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
+    name: 'BlackBox Coverage'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: xdebug
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: Setup schema
+        run: vendor/bin/doctrine orm:schema:update --force
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+      - name: BlackBox
+        run: php blackbox.php ci
+        env:
+          ENABLE_COVERAGE: 'true'
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'Coverage'
     services:
       mariadb:
@@ -64,12 +146,14 @@ jobs:
           coverage: xdebug
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Setup schema
         run: vendor/bin/doctrine orm:schema:update --force
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - name: PHPUnit
-        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover --exclude-group=slow
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
           BLACKBOX_SET_SIZE: 1
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}

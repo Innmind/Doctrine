@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.1 - 2023-09-18
+
+### Fixed
+
+- `Sign::contains`, `Sign::startsWith` and `Sign::endsWith` would not yield the expected result when containing special characters `\`, `_` and `%` (as they're special pattern characters), these characters are now escaped so it would exactly match
+
 ## 2.5.0 - 2023-09-16
 
 ### Added

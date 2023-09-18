@@ -6,6 +6,7 @@ namespace Tests\Innmind\Doctrine;
 use Innmind\Doctrine\{
     Manager,
     Sort,
+    Id,
 };
 use Innmind\Immutable\Either;
 use PHPUnit\Framework\TestCase;
@@ -269,48 +270,137 @@ class FunctionalTest extends TestCase
         $this->assertSame(100, $repository->count());
     }
 
-    /**
-     * @group slow
-     */
-    public function testDoesntLoadEverythingInMemoryWhenLazyFetching()
+    public function testMatchingStartsWith()
     {
-        $entityManager = require __DIR__.'/../config/entity-manager.php';
-        $this->reset($entityManager);
-        $manager = Manager::of($entityManager);
-        $repository = $manager->repository(User::class);
         $this
-            ->forAll(FUser::any(null, Set\Sequence::of(
-                Set\Composite::immutable(
-                    static fn(...$args) => new Address(...$args),
-                    Set\Elements::of(true, false),
-                    Set\Strings::madeOf(Set\Chars::alphanumerical()),
+            ->forAll(
+                Set\Uuid::any(),
+                Set\MutuallyExclusive::of(
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
                 ),
-            )->between(0, 2)))
-            ->take(10_000)
-            ->then(static function($user) use ($manager, $repository) {
-                $manager->mutate(static fn() => Either::right($repository->add($user)));
-                $manager->clear();
+            )
+            ->then(function($id, $strings) {
+                [$prefix, $random, $username] = $strings;
+
+                $entityManager = require __DIR__.'/../config/entity-manager.php';
+                $this->reset($entityManager);
+                $manager = Manager::of($entityManager);
+                $repository = $manager->repository(User::class);
+                $manager->mutate(static fn() => Either::right(
+                    $repository->add(new User(
+                        new Id($id),
+                        $prefix.$username,
+                    )),
+                ));
+
+                $this->assertSame(
+                    1,
+                    $repository
+                        ->matching(Username::startsWith($prefix))
+                        ->fetch()
+                        ->size(),
+                );
+                $this->assertSame(
+                    0,
+                    $repository
+                        ->matching(Username::startsWith($random))
+                        ->fetch()
+                        ->size(),
+                );
+
+                $this->close($entityManager);
             });
+    }
 
-        $memory = \memory_get_peak_usage();
-        $count = $repository
-            ->all()
-            ->lazy()
-            ->fetch()
-            ->reduce(
-                0,
-                static function(int $count, $user) use ($manager) {
-                    $_ = $user->addresses(); // to make sure sub entities are loadable
-                    $manager->clear();
+    public function testMatchingEndsWith()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                Set\MutuallyExclusive::of(
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 55),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 200),
+                ),
+            )
+            ->then(function($id, $strings) {
+                [$suffix, $random, $username] = $strings;
 
-                    return $count + 1;
-                },
-            );
+                $entityManager = require __DIR__.'/../config/entity-manager.php';
+                $this->reset($entityManager);
+                $manager = Manager::of($entityManager);
+                $repository = $manager->repository(User::class);
+                $manager->mutate(static fn() => Either::right(
+                    $repository->add(new User(
+                        new Id($id),
+                        $username.$suffix,
+                    )),
+                ));
 
-        $this->assertSame(10_000, $count);
-        // Without the lazy loading combined with the clear of the manager it
-        // takes around 45Mo
-        $this->assertLessThanOrEqual(7_000_000, \memory_get_peak_usage() - $memory);
+                $this->assertSame(
+                    1,
+                    $repository
+                        ->matching(Username::endsWith($suffix))
+                        ->fetch()
+                        ->size(),
+                );
+                $this->assertSame(
+                    0,
+                    $repository
+                        ->matching(Username::endsWith($random))
+                        ->fetch()
+                        ->size(),
+                );
+
+                $this->close($entityManager);
+            });
+    }
+
+    public function testMatchingContains()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                Set\MutuallyExclusive::of(
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 50),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(0, 50),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 155),
+                    Set\Strings::madeOf(Set\Chars::ascii())->between(1, 155),
+                ),
+            )
+            ->then(function($id, $strings) {
+                [$prefix, $suffix, $username, $random] = $strings;
+
+                $entityManager = require __DIR__.'/../config/entity-manager.php';
+                $this->reset($entityManager);
+                $manager = Manager::of($entityManager);
+                $repository = $manager->repository(User::class);
+                $manager->mutate(static fn() => Either::right(
+                    $repository->add(new User(
+                        new Id($id),
+                        $prefix.$username.$suffix,
+                    )),
+                ));
+
+                $this->assertSame(
+                    1,
+                    $repository
+                        ->matching(Username::contains($username))
+                        ->fetch()
+                        ->size(),
+                );
+                $this->assertSame(
+                    0,
+                    $repository
+                        ->matching(Username::contains($random))
+                        ->fetch()
+                        ->size(),
+                );
+
+                $this->close($entityManager);
+            });
     }
 
     private function reset($entityManager): void
@@ -330,5 +420,12 @@ class FunctionalTest extends TestCase
         $entityManager
             ->getConnection()
             ->executeUpdate('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function close($entityManager): void
+    {
+        $entityManager
+            ->getConnection()
+            ->close();
     }
 }

@@ -12,7 +12,10 @@ use Innmind\Specification\{
     Composite,
     Not,
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    Str,
+};
 use Doctrine\ORM\{
     EntityRepository,
     EntityManagerInterface,
@@ -185,6 +188,13 @@ final class ToQueryBuilder
 
         $property = $this->decodeJson($property, $field, $relation);
 
+        // Blackslash, underscore and percentage are special characters in a
+        // LIKE condition in order to build patterns, they are escaped here so
+        // the user can use these characters for an exact match as would suggest
+        // the Sign name.
+        // If you land here because your pattern doesn't work, know that you
+        // can't achieve this with a specification, you'll need to build the SQL
+        // query yourself.
         /** @psalm-suppress MixedOperand Due to the implicit string cast in the LIKE */
         return match ($specification->sign()) {
             Sign::equality => $qb->expr()->eq(
@@ -215,15 +225,40 @@ final class ToQueryBuilder
             Sign::isNotNull => $qb->expr()->isNotNull($property),
             Sign::startsWith => $qb->expr()->like(
                 $property,
-                $this->placeholder($specification->value().'%', $qb),
+                $this->placeholder(
+                    Str::of((string) $specification->value())
+                        ->replace('\\', '\\\\')
+                        ->replace('_', '\_')
+                        ->replace('%', '\%')
+                        ->append('%')
+                        ->toString(),
+                    $qb,
+                ),
             ),
             Sign::endsWith => $qb->expr()->like(
                 $property,
-                $this->placeholder('%'.$specification->value(), $qb),
+                $this->placeholder(
+                    Str::of((string) $specification->value())
+                        ->replace('\\', '\\\\')
+                        ->replace('_', '\_')
+                        ->replace('%', '\%')
+                        ->prepend('%')
+                        ->toString(),
+                    $qb,
+                ),
             ),
             Sign::contains => $qb->expr()->like(
                 $property,
-                $this->placeholder('%'.$specification->value().'%', $qb),
+                $this->placeholder(
+                    Str::of((string) $specification->value())
+                        ->replace('\\', '\\\\')
+                        ->replace('_', '\_')
+                        ->replace('%', '\%')
+                        ->prepend('%')
+                        ->append('%')
+                        ->toString(),
+                    $qb,
+                ),
             ),
             Sign::in => $qb->expr()->in(
                 $property,
