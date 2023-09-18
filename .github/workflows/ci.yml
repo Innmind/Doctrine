@@ -114,7 +114,7 @@ jobs:
       - name: BlackBox
         run: php blackbox.php
         env:
-          ENABLE_COVERAGE: '1'
+          ENABLE_COVERAGE: 'true'
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - uses: codecov/codecov-action@v1
         with:
