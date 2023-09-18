@@ -74,7 +74,7 @@ jobs:
         run: vendor/bin/doctrine orm:schema:update --force
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
-      - name: PHPUnit
+      - name: BlackBox
         run: php blackbox.php
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
@@ -111,7 +111,7 @@ jobs:
         run: vendor/bin/doctrine orm:schema:update --force
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
-      - name: PHPUnit
+      - name: BlackBox
         run: php blackbox.php
         env:
           ENABLE_COVERAGE: '1'
