@@ -37,6 +37,16 @@ final class Username implements Comparator
         return new self($username, Sign::startsWith);
     }
 
+    public static function endsWith(string $username): self
+    {
+        return new self($username, Sign::endsWith);
+    }
+
+    public static function contains(string $username): self
+    {
+        return new self($username, Sign::contains);
+    }
+
     public function property(): string
     {
         return 'username';
