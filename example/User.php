@@ -18,19 +18,22 @@ final class User
     private ?self $parent = null;
     public Collection $children;
     public Collection $addresses;
+    public string $crééLe;
 
     public function __construct(
         Id $id,
         string $username,
         int $registerIndex = 0,
         array $children = [],
-        array $addresses = []
+        array $addresses = [],
+
     ) {
         $this->id = $id;
         $this->username = $username;
         $this->registerIndex = $registerIndex;
         $this->children = new ArrayCollection([]);
         $this->addresses = new ArrayCollection($addresses);
+        $this->crééLe = "https://youtu.be/wW961dzHavs";
 
         foreach ($children as $child) {
             $child->parent = $this;
