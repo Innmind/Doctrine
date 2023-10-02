@@ -132,6 +132,17 @@ class FunctionalTest extends TestCase
                 static fn() => null,
             ),
         );
+
+        // Propriété avec accent :(
+        $users = $repository
+            ->all()
+            ->sort('crééLe', Sort::asc)
+            ->fetch();
+        
+        $this->assertEquals(
+            4, // je suppose 
+            count($users->toList())
+        );
     }
 
     public function testMatchingPagination()
