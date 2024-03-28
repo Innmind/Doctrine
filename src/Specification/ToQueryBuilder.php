@@ -22,10 +22,6 @@ use Doctrine\ORM\{
     QueryBuilder,
     Query\Expr\Join,
 };
-use Doctrine\Common\Collections\{
-    Criteria,
-    Expr\Expression,
-};
 use Doctrine\DBAL\Types\{
     Type,
     JsonType,

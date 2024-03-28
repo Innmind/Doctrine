@@ -18,7 +18,6 @@ use Fixtures\Innmind\Doctrine\User as FUser;
 use Example\Innmind\Doctrine\{
     User,
     Username,
-    Address,
 };
 
 class FunctionalTest extends TestCase
