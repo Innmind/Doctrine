@@ -193,14 +193,13 @@ final class ToQueryBuilder
         // query yourself.
         /** @psalm-suppress MixedOperand Due to the implicit string cast in the LIKE */
         return match ($specification->sign()) {
-            Sign::equality => $qb->expr()->eq(
-                $property,
-                $this->placeholder($specification->value(), $qb),
-            ),
-            Sign::inequality => $qb->expr()->neq(
-                $property,
-                $this->placeholder($specification->value(), $qb),
-            ),
+            Sign::equality => match ($specification->value()) {
+                null => $qb->expr()->isNull($property),
+                default => $qb->expr()->eq(
+                    $property,
+                    $this->placeholder($specification->value(), $qb),
+                ),
+            },
             Sign::lessThan => $qb->expr()->lt(
                 $property,
                 $this->placeholder($specification->value(), $qb),
@@ -209,16 +208,6 @@ final class ToQueryBuilder
                 $property,
                 $this->placeholder($specification->value(), $qb),
             ),
-            Sign::lessThanOrEqual => $qb->expr()->lte(
-                $property,
-                $this->placeholder($specification->value(), $qb),
-            ),
-            Sign::moreThanOrEqual => $qb->expr()->gte(
-                $property,
-                $this->placeholder($specification->value(), $qb),
-            ),
-            Sign::isNull => $qb->expr()->isNull($property),
-            Sign::isNotNull => $qb->expr()->isNotNull($property),
             Sign::startsWith => $qb->expr()->like(
                 $property,
                 $this->placeholder(
