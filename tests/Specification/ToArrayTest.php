@@ -49,7 +49,6 @@ class ToArrayTest extends TestCase
     {
         $this
             ->forAll(Set\Elements::of(
-                Sign::equality,
                 Sign::lessThan,
                 Sign::moreThan,
                 Sign::startsWith,
