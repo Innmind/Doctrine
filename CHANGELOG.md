@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0 - 2024-07-07
+
+### Changed
+
+- Requires `innmind/specification:~4.0`
+
 ## 2.5.1 - 2023-09-18
 
 ### Fixed
