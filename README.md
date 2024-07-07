@@ -4,6 +4,9 @@
 [![codecov](https://codecov.io/gh/innmind/doctrine/branch/develop/graph/badge.svg)](https://codecov.io/gh/innmind/doctrine)
 [![Type Coverage](https://shepherd.dev/github/innmind/doctrine/coverage.svg)](https://shepherd.dev/github/innmind/doctrine)
 
+> [!IMPORTANT]
+> This project has been a stepping stone for the [Formal ORM](https://formal-php.github.io/orm/). It's no longer actively maintained and will be archived at some point.
+
 This library is an abstraction on top of [Doctrine](https://packagist.org/packages/doctrine/orm) with the intention to remove all implicit states.
 
 Managing the state in an application can become hard when the codebase grows and states (especially implicit ones) is one of the source of bugs in applications.

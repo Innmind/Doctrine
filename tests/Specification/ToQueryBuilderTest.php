@@ -14,6 +14,7 @@ use Innmind\Specification\{
     Not,
     Composite,
     Operator,
+    OrSpecification,
 };
 use Doctrine\ORM\{
     EntityManagerInterface,
@@ -89,7 +90,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
                     ->willReturn($value);
@@ -110,10 +111,10 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository, $em))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))(new Not\Implementation($specification));
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$property} <> ?1", (string) $qb);
+                $this->assertSame("SELECT WHERE NOT(entity.{$property} = ?1)", (string) $qb);
                 $this->assertSame($value, $qb->getParameter(1)->getValue());
             });
     }
@@ -212,16 +213,27 @@ class ToQueryBuilderTest extends TestCase
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
+                $lessThan = $this->createMock(Comparator::class);
+                $lessThan
                     ->method('property')
                     ->willReturn($property);
-                $specification
+                $lessThan
                     ->method('sign')
-                    ->willReturn(Sign::lessThanOrEqual);
-                $specification
+                    ->willReturn(Sign::lessThan);
+                $lessThan
                     ->method('value')
                     ->willReturn($value);
+                $equal = $this->createMock(Comparator::class);
+                $equal
+                    ->method('property')
+                    ->willReturn($property);
+                $equal
+                    ->method('sign')
+                    ->willReturn(Sign::equality);
+                $equal
+                    ->method('value')
+                    ->willReturn($value);
+                $specification = new OrSpecification($lessThan, $equal);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -242,8 +254,9 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$property} <= ?1", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$property} < ?1 OR entity.{$property} = ?2", (string) $qb);
                 $this->assertSame($value, $qb->getParameter(1)->getValue());
+                $this->assertSame($value, $qb->getParameter(2)->getValue());
             });
     }
 
@@ -255,16 +268,27 @@ class ToQueryBuilderTest extends TestCase
                 Set\Unicode::strings(),
             )
             ->then(function($property, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
+                $moreThan = $this->createMock(Comparator::class);
+                $moreThan
                     ->method('property')
                     ->willReturn($property);
-                $specification
+                $moreThan
                     ->method('sign')
-                    ->willReturn(Sign::moreThanOrEqual);
-                $specification
+                    ->willReturn(Sign::moreThan);
+                $moreThan
                     ->method('value')
                     ->willReturn($value);
+                $equal = $this->createMock(Comparator::class);
+                $equal
+                    ->method('property')
+                    ->willReturn($property);
+                $equal
+                    ->method('sign')
+                    ->willReturn(Sign::equality);
+                $equal
+                    ->method('value')
+                    ->willReturn($value);
+                $specification = new OrSpecification($moreThan, $equal);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -285,8 +309,9 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$property} >= ?1", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$property} > ?1 OR entity.{$property} = ?2", (string) $qb);
                 $this->assertSame($value, $qb->getParameter(1)->getValue());
+                $this->assertSame($value, $qb->getParameter(2)->getValue());
             });
     }
 
@@ -295,19 +320,18 @@ class ToQueryBuilderTest extends TestCase
         $this
             ->forAll(
                 $this->names(),
-                Set\Unicode::strings(),
             )
-            ->then(function($property, $value) {
+            ->then(function($property) {
                 $specification = $this->createMock(Comparator::class);
                 $specification
                     ->method('property')
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::isNull);
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
-                    ->willReturn($value);
+                    ->willReturn(null);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -338,19 +362,18 @@ class ToQueryBuilderTest extends TestCase
         $this
             ->forAll(
                 $this->names(),
-                Set\Unicode::strings(),
             )
-            ->then(function($property, $value) {
+            ->then(function($property) {
                 $specification = $this->createMock(Comparator::class);
                 $specification
                     ->method('property')
                     ->willReturn($property);
                 $specification
                     ->method('sign')
-                    ->willReturn(Sign::isNotNull);
+                    ->willReturn(Sign::equality);
                 $specification
                     ->method('value')
-                    ->willReturn($value);
+                    ->willReturn(null);
                 $em = $this->createMock(EntityManagerInterface::class);
                 $em
                     ->method('getExpressionBuilder')
@@ -368,10 +391,10 @@ class ToQueryBuilderTest extends TestCase
                     ->with('entity')
                     ->willReturn($expected = new QueryBuilder($em));
 
-                $qb = (new ToQueryBuilder($repository, $em))($specification);
+                $qb = (new ToQueryBuilder($repository, $em))(new Not\Implementation($specification));
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$property} IS NOT NULL", (string) $qb);
+                $this->assertSame("SELECT WHERE NOT(entity.{$property} IS NULL)", (string) $qb);
                 $this->assertCount(0, $qb->getParameters());
             });
     }
@@ -494,7 +517,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($rightProperty);
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -504,7 +527,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($left);
                 $specification
                     ->method('right')
-                    ->willReturn($right);
+                    ->willReturn(new Not\Implementation($right));
                 $specification
                     ->method('operator')
                     ->willReturn(Operator::and);
@@ -528,7 +551,7 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND entity.{$rightProperty} <> ?2", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND NOT(entity.{$rightProperty} = ?2)", (string) $qb);
                 $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
                 $this->assertSame($rightValue, $qb->getParameter(2)->getValue());
             });
@@ -560,7 +583,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($rightProperty);
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -570,7 +593,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($left);
                 $specification
                     ->method('right')
-                    ->willReturn($right);
+                    ->willReturn(new Not\Implementation($right));
                 $specification
                     ->method('operator')
                     ->willReturn(Operator::or);
@@ -594,7 +617,7 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 OR entity.{$rightProperty} <> ?2", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 OR NOT(entity.{$rightProperty} = ?2)", (string) $qb);
                 $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
                 $this->assertSame($rightValue, $qb->getParameter(2)->getValue());
             });
@@ -635,7 +658,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right1Property);
                 $right1
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $right1
                     ->method('value')
                     ->willReturn($right1Value);
@@ -645,17 +668,17 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($right2Property);
                 $right2
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $right2
                     ->method('value')
                     ->willReturn($right2Value);
                 $right = $this->createMock(Composite::class);
                 $right
                     ->method('left')
-                    ->willReturn($right1);
+                    ->willReturn(new Not\Implementation($right1));
                 $right
                     ->method('right')
-                    ->willReturn($right2);
+                    ->willReturn(new Not\Implementation($right2));
                 $right
                     ->method('operator')
                     ->willReturn(Operator::or);
@@ -689,7 +712,7 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND (entity.{$right1Property} <> ?2 OR entity.{$right2Property} <> ?3)", (string) $qb);
+                $this->assertSame("SELECT WHERE entity.{$leftProperty} = ?1 AND (NOT(entity.{$right1Property} = ?2) OR NOT(entity.{$right2Property} = ?3))", (string) $qb);
                 $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
                 $this->assertSame($right1Value, $qb->getParameter(2)->getValue());
                 $this->assertSame($right2Value, $qb->getParameter(3)->getValue());
@@ -777,7 +800,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn("$relation.$rightProperty");
                 $right
                     ->method('sign')
-                    ->willReturn(Sign::inequality);
+                    ->willReturn(Sign::equality);
                 $right
                     ->method('value')
                     ->willReturn($rightValue);
@@ -787,7 +810,7 @@ class ToQueryBuilderTest extends TestCase
                     ->willReturn($left);
                 $specification
                     ->method('right')
-                    ->willReturn($right);
+                    ->willReturn(new Not\Implementation($right));
                 $specification
                     ->method('operator')
                     ->willReturn(Operator::and);
@@ -819,7 +842,7 @@ class ToQueryBuilderTest extends TestCase
                 $qb = (new ToQueryBuilder($repository, $em))($specification);
 
                 $this->assertSame($expected, $qb);
-                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$leftProperty} = ?1 AND {$relation}.{$rightProperty} <> ?2", (string) $qb);
+                $this->assertSame("SELECT entity FROM Entity entity LEFT JOIN entity.{$relation} {$relation} WHERE {$relation}.{$leftProperty} = ?1 AND NOT({$relation}.{$rightProperty} = ?2)", (string) $qb);
                 $this->assertSame($leftValue, $qb->getParameter(1)->getValue());
                 $this->assertSame($rightValue, $qb->getParameter(2)->getValue());
             });
